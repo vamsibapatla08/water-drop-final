@@ -29,6 +29,62 @@ const dirtyDropRuleText = document.getElementById("dirty-drop-rule-text");
 const bonusCanRuleText = document.getElementById("bonus-can-rule-text");
 const urlParams = new URLSearchParams(window.location.search);
 
+// Audio system - using Web Audio API with data URIs for sound effects
+const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+// Function to play a sound using Web Audio API synthetically
+function playSound(frequency, duration, type = 'sine', volume = 0.3) {
+  try {
+    const now = audioContext.currentTime;
+    const osc = audioContext.createOscillator();
+    const gain = audioContext.createGain();
+    
+    osc.type = type;
+    osc.frequency.setValueAtTime(frequency, now);
+    gain.gain.setValueAtTime(volume, now);
+    gain.gain.exponentialRampToValueAtTime(0.01, now + duration);
+    
+    osc.connect(gain);
+    gain.connect(audioContext.destination);
+    
+    osc.start(now);
+    osc.stop(now + duration);
+  } catch (e) {
+    console.log('Audio playback error:', e);
+  }
+}
+
+// Play positive sound when catching a clean drop
+function playCollectSound() {
+  playSound(800, 0.15, 'sine', 0.2);
+  setTimeout(() => playSound(1200, 0.15, 'sine', 0.2), 80);
+}
+
+// Play celebration sound when catching a bonus can
+function playBonusSound() {
+  playSound(1000, 0.1, 'sine', 0.25);
+  setTimeout(() => playSound(1300, 0.1, 'sine', 0.25), 60);
+  setTimeout(() => playSound(1600, 0.15, 'sine', 0.25), 120);
+}
+
+// Play negative sound when hitting a dirty drop
+function playMissSound() {
+  playSound(400, 0.2, 'sine', 0.2);
+  setTimeout(() => playSound(300, 0.25, 'sine', 0.2), 150);
+}
+
+// Play UI click sound
+function playClickSound() {
+  playSound(600, 0.08, 'sine', 0.15);
+}
+
+// Play victory fanfare when winning
+function playWinSound() {
+  playSound(800, 0.15, 'sine', 0.25);
+  setTimeout(() => playSound(1000, 0.15, 'sine', 0.25), 150);
+  setTimeout(() => playSound(1200, 0.3, 'sine', 0.25), 300);
+}
+
 const terrainBackgrounds = {
   desert: `
     radial-gradient(circle at 20% 18%, rgba(255, 236, 178, 0.28) 0 16%, rgba(255, 236, 178, 0) 40%),
@@ -159,8 +215,14 @@ let hasShownDirtyDropNotice = false;
 let dirtyDropNoticeTimeoutId = null;
 
 // Wait for button click to start the game
-startButton.addEventListener("click", startGame);
-document.getElementById("reset-btn").addEventListener("click", resetGame);
+startButton.addEventListener("click", () => {
+  playClickSound();
+  startGame();
+});
+document.getElementById("reset-btn").addEventListener("click", () => {
+  playClickSound();
+  resetGame();
+});
 gameContainer.addEventListener("pointerdown", startPointerControl);
 gameContainer.addEventListener("pointermove", moveBucketWithPointer);
 gameContainer.addEventListener("pointerup", stopPointerControl);
@@ -169,7 +231,10 @@ document.addEventListener("keydown", moveBucketWithKeyboard);
 window.addEventListener("resize", handleWindowResize);
 
 if (dirtyDropNoticeCloseButton) {
-  dirtyDropNoticeCloseButton.addEventListener("click", () => hideDirtyDropNotice(true));
+  dirtyDropNoticeCloseButton.addEventListener("click", () => {
+    playClickSound();
+    hideDirtyDropNotice(true);
+  });
 }
 
 function startGame() {
@@ -502,9 +567,20 @@ function checkBucketCollisions() {
 
     if (overlapsBucket) {
       const pointChange = Number(drop.dataset.pointChange || "1");
+      
+      // Play appropriate sound based on drop type
       if (pointChange < 0) {
+        // Dirty drop - negative sound
+        playMissSound();
         showDirtyDropNoticeOnce();
+      } else if (pointChange > activeDifficulty.cleanDropPoints) {
+        // Bonus can - celebration sound
+        playBonusSound();
+      } else {
+        // Clean drop - positive sound
+        playCollectSound();
       }
+      
       score = Math.max(0, score + pointChange);
       updateScoreDisplay();
       drop.remove();
@@ -544,6 +620,7 @@ function showEndMessage() {
   gameMessage.classList.add(wonRound ? "win" : "lose");
 
   if (wonRound) {
+    playWinSound();
     launchConfetti();
   } else {
     clearConfetti();

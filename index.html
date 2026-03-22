@@ -93,6 +93,29 @@
     const terrainButtons = document.querySelectorAll(".intro-screen__terrain-btn");
     let selectedDifficulty = "medium";
 
+    // Audio helper function for click sounds on intro page
+    function playClickSound() {
+      try {
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const now = audioContext.currentTime;
+        const osc = audioContext.createOscillator();
+        const gain = audioContext.createGain();
+        
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(600, now);
+        gain.gain.setValueAtTime(0.15, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+        
+        osc.connect(gain);
+        gain.connect(audioContext.destination);
+        
+        osc.start(now);
+        osc.stop(now + 0.08);
+      } catch (e) {
+        console.log('Audio playback error:', e);
+      }
+    }
+
     function applyTheme(isDarkMode) {
       if (!introPanel || !themeToggleButton) return;
 
@@ -107,6 +130,7 @@
 
     if (themeToggleButton) {
       themeToggleButton.addEventListener("click", () => {
+        playClickSound();
         const isDarkMode = !introPanel?.classList.contains("is-dark");
         applyTheme(Boolean(isDarkMode));
       });
@@ -114,6 +138,7 @@
 
     if (startGameButton) {
       startGameButton.addEventListener("click", () => {
+        playClickSound();
         if (!infoGrid || !missionSection || !gameplaySection || !difficultySection || !terrainSection) {
           window.location.href = "game.html?autostart=1";
           return;
@@ -130,6 +155,7 @@
 
     difficultyButtons.forEach((button) => {
       button.addEventListener("click", () => {
+        playClickSound();
         selectedDifficulty = button.dataset.difficulty || "medium";
         if (difficultySection) {
           difficultySection.hidden = true;
@@ -142,6 +168,7 @@
 
     terrainButtons.forEach((button) => {
       button.addEventListener("click", () => {
+        playClickSound();
         const terrain = button.dataset.terrain || "desert";
         window.location.href = `game.html?autostart=1&difficulty=${encodeURIComponent(selectedDifficulty)}&terrain=${encodeURIComponent(terrain)}`;
       });
