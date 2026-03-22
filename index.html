@@ -10,104 +10,50 @@
 </head>
 
 <body>
-  <div class="game-wrapper">
+  <section id="intro-screen" class="intro-screen" aria-labelledby="intro-heading" aria-hidden="false">
+    <div class="intro-screen__backdrop" aria-hidden="true"></div>
 
-    <div class="title-row">
-      <h1 class="game-title">Water Drop</h1>
-      <div class="cw-brand" aria-label="charity: water">
-        <img class="cw-logo" src="img/cw_logo-horizontal.png" alt="charity: water logo">
-        <span class="cw-brand-line">Official charity: water branding</span>
+    <div class="intro-screen__panel">
+
+      <p class="intro-screen__eyebrow">charity: water mission intro</p>
+      <h1 id="intro-heading" class="intro-screen__title">Every Drop Can Change a Life</h1>
+      <p class="intro-screen__text">
+        charity: water helps bring clean, safe water to communities around the world.
+        In this game, clean drops represent progress and dirty drops represent risks to health.
+        Catch wisely and build impact before time runs out.
+      </p>
+
+      <div class="intro-screen__actions" aria-label="Gameplay options">
+        <a href="game.html?autostart=1" class="intro-screen__btn intro-screen__btn--primary">Start Mission</a>
+        <a href="game.html" class="intro-screen__btn intro-screen__btn--secondary">Enter Arena</a>
+        <button id="intro-guide-btn" type="button" class="intro-screen__btn intro-screen__btn--ghost"
+          aria-expanded="false" aria-controls="intro-guide">
+          How to Play
+        </button>
       </div>
+
+      <div id="intro-guide" class="intro-screen__guide" hidden>
+        <p><strong>Goal:</strong> Reach 20 points in 30 seconds.</p>
+        <p><strong>Controls:</strong> Drag in the game area, or use A/D and arrow keys.</p>
+        <p><strong>Scoring:</strong> Good drops are +1 and dirty drops are -1.</p>
+      </div>
+      
     </div>
+  </section>
 
-    <p class="game-tagline">Catch the good drops, avoid the bad ones!</p>
+  <script>
+    const guideButton = document.getElementById("intro-guide-btn");
+    const guidePanel = document.getElementById("intro-guide");
 
-    <p class="brand-note">100% of public donations fund clean water projects.</p>
-
-    <div class="score-panel">
-      <div class="score">Score: <span id="score">0</span></div>
-      <div class="timer">Time: <span id="time">30</span>s</div>
-      <div class="action-buttons">
-        <button id="start-btn">Start Game</button>
-        <button id="reset-btn">Reset</button>
-      </div>
-    </div>
-
-    <div class="game-area">
-      <div class="score-progress" aria-hidden="true">
-        <div id="score-progress-fill"></div>
-      </div>
-
-      <div id="game-container">
-        <div id="start-overlay" class="start-overlay" aria-hidden="false">
-          <div class="card border-0 shadow-lg intro-card">
-            <div class="card-body p-3 p-md-4">
-              <h2 class="h3 fw-bold mb-1 intro-title">Round Briefing</h2>
-              <p class="text-secondary mb-3">Learn the drops, beat the target, then hit Start Game.</p>
-
-              <div class="row g-2">
-                <div class="col-12 col-md-6">
-                  <div class="d-flex align-items-center gap-2 rounded-3 border p-2 intro-legend-item">
-                    <span class="legend-drop legend-drop-good" aria-hidden="true"></span>
-                    <div class="d-grid intro-copy">
-                      <strong>Good Drop</strong>
-                      <span>Catch it for +1 score.</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="col-12 col-md-6">
-                  <div class="d-flex align-items-center gap-2 rounded-3 border p-2 intro-legend-item">
-                    <span class="legend-drop legend-drop-bad" aria-hidden="true"></span>
-                    <div class="d-grid intro-copy">
-                      <strong>Bad Drop</strong>
-                      <span>Avoid it to prevent -1 score.</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="col-12 col-md-6">
-                  <div class="d-flex align-items-center gap-2 rounded-3 border p-2 intro-legend-item">
-                    <span class="badge rounded-pill intro-badge-goal" aria-hidden="true">20+</span>
-                    <div class="d-grid intro-copy">
-                      <strong>Goal</strong>
-                      <span>Reach 20 points before 30 seconds ends.</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="col-12 col-md-6">
-                  <div class="d-flex align-items-center gap-2 rounded-3 border p-2 intro-legend-item">
-                    <span class="badge rounded-pill intro-badge-controls" aria-hidden="true">A D</span>
-                    <div class="d-grid intro-copy">
-                      <strong>Controls</strong>
-                      <span>Drag in the game area, or use A/D and arrow keys.</span>
-                    </div>
-                  </div>
-                </div>
-
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div id="dirty-drop-notice" class="alert alert-danger alert-dismissible fade dirty-drop-notice d-none"
-          role="alert" aria-live="polite">
-          <strong>Bad drop caught.</strong> Dirty water drops can deteriorate the environment and health.
-          <button id="dirty-drop-notice-close" type="button" class="btn-close" aria-label="Close warning"></button>
-        </div>
-
-        <div id="bucket" aria-hidden="true"></div>
-      </div>
-    </div>
-
-    <p class="control-hint">Move bucket: drag/touch in the game area, or use A/D and arrow keys.</p>
-
-    <p id="game-message" class="game-message" aria-live="polite"></p>
-
-  </div>
-
-  <script src="script.js"></script>
+    if (guideButton && guidePanel) {
+      guideButton.addEventListener("click", () => {
+        const isExpanded = guideButton.getAttribute("aria-expanded") === "true";
+        guideButton.setAttribute("aria-expanded", String(!isExpanded));
+        guidePanel.hidden = isExpanded;
+      });
+    }
+  </script>
+  
 </body>
 
 </html>

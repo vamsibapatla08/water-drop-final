@@ -496,6 +496,14 @@ function clearConfetti() {
 
 updateScoreDisplay();
 updateTimeDisplay();
-showStartOverlay();
 centerBucket();
 clearEndMessage();
+
+const urlParams = new URLSearchParams(window.location.search);
+const shouldAutoStart = ["1", "true", "yes"].includes((urlParams.get("autostart") || "").toLowerCase());
+
+if (shouldAutoStart) {
+  startGame();
+} else {
+  showStartOverlay();
+}
