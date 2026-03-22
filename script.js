@@ -4,13 +4,14 @@ let dropMaker; // Will store our timer that creates drops regularly
 let gameTimer;
 let collisionChecker;
 let score = 0;
-const maxProgressScore = 20;
-const dropSizePx = 52;
+let maxProgressScore = 20;
+const dropSizePx = 48;
 const spawnTickMs = 250;
-const gameDurationSeconds = 30;
-const finalChallengeSeconds = 6;
+let gameDurationSeconds = 30;
+let finalChallengeSeconds = 6;
 let timeLeft = gameDurationSeconds;
 let spawnAccumulator = 0;
+
 const scoreDisplay = document.getElementById("score");
 const timeDisplay = document.getElementById("time");
 const gameContainer = document.getElementById("game-container");
@@ -21,6 +22,117 @@ const startOverlay = document.getElementById("start-overlay");
 const startButton = document.getElementById("start-btn");
 const dirtyDropNotice = document.getElementById("dirty-drop-notice");
 const dirtyDropNoticeCloseButton = document.getElementById("dirty-drop-notice-close");
+const difficultyLabelDisplay = document.getElementById("difficulty-label");
+const roundGoalBadge = document.getElementById("round-goal-badge");
+const roundGoalText = document.getElementById("round-goal-text");
+const dirtyDropRuleText = document.getElementById("dirty-drop-rule-text");
+const bonusCanRuleText = document.getElementById("bonus-can-rule-text");
+const urlParams = new URLSearchParams(window.location.search);
+
+const terrainBackgrounds = {
+  desert: `
+    radial-gradient(circle at 20% 18%, rgba(255, 236, 178, 0.28) 0 16%, rgba(255, 236, 178, 0) 40%),
+    radial-gradient(circle at 82% 26%, rgba(237, 170, 94, 0.25) 0 18%, rgba(237, 170, 94, 0) 45%),
+    linear-gradient(180deg, #ffe5ab 0%, #e8b366 45%, #c78849 100%)
+  `,
+  mountains: `
+    radial-gradient(circle at 52% 18%, rgba(236, 242, 248, 0.26) 0 18%, rgba(236, 242, 248, 0) 44%),
+    linear-gradient(165deg, rgba(95, 104, 118, 0.9) 0%, rgba(79, 88, 102, 0.9) 35%, rgba(53, 62, 73, 0.92) 100%),
+    linear-gradient(180deg, #b9c4d1 0%, #8e9aa8 50%, #657383 100%)
+  `,
+  frozen: `
+    radial-gradient(circle at 50% 14%, rgba(255, 255, 255, 0.48) 0 14%, rgba(255, 255, 255, 0) 40%),
+    radial-gradient(circle at 14% 78%, rgba(147, 208, 244, 0.26) 0 22%, rgba(147, 208, 244, 0) 52%),
+    linear-gradient(180deg, #eef9ff 0%, #ccecff 45%, #95cfee 100%)
+  `,
+  grasslands: `
+    radial-gradient(circle at 18% 18%, rgba(255, 255, 255, 0.34) 0 14%, rgba(255, 255, 255, 0) 40%),
+    radial-gradient(circle at 84% 26%, rgba(149, 219, 112, 0.26) 0 18%, rgba(149, 219, 112, 0) 46%),
+    linear-gradient(180deg, #d8f4b9 0%, #9ed97a 46%, #61a950 100%)
+  `,
+};
+
+const difficultySettings = {
+  easy: {
+    label: "Easy",
+    targetScore: 16,
+    durationSeconds: 36,
+    finalChallengeSeconds: 7,
+    cleanDropPoints: 1,
+    dirtyDropDamage: 1,
+    bonusCanPoints: 5,
+    bonusCanChance: 0.03,
+    spawnRateMultiplier: 0.88,
+    phaseMultiplierScale: 0.92,
+    dirtyDropChance: {
+      early: 0.3,
+      mid: 0.38,
+      late: 0.46,
+      final: 0.54,
+    },
+    fallSpeedMultiplier: 0.9,
+    minDropsPerSecond: 1,
+    maxDropsPerSecond: 6.4,
+    minFallDuration: 1.35,
+    maxFallDuration: 5,
+  },
+
+  medium: {
+    label: "Medium",
+    targetScore: 20,
+    durationSeconds: 30,
+    finalChallengeSeconds: 6,
+    cleanDropPoints: 1,
+    dirtyDropDamage: 2,
+    bonusCanPoints: 5,
+    bonusCanChance: 0.03,
+    spawnRateMultiplier: 1,
+    phaseMultiplierScale: 1,
+    dirtyDropChance: {
+      early: 0.38,
+      mid: 0.45,
+      late: 0.52,
+      final: 0.62,
+    },
+    fallSpeedMultiplier: 1,
+    minDropsPerSecond: 1.1,
+    maxDropsPerSecond: 7.5,
+    minFallDuration: 1.2,
+    maxFallDuration: 4.6,
+  },
+  
+  hard: {
+    label: "Hard",
+    targetScore: 26,
+    durationSeconds: 28,
+    finalChallengeSeconds: 5,
+    cleanDropPoints: 2,
+    dirtyDropDamage: 3,
+    bonusCanPoints: 4,
+    bonusCanChance: 0.03,
+    spawnRateMultiplier: 1.24,
+    phaseMultiplierScale: 1.1,
+    dirtyDropChance: {
+      early: 0.45,
+      mid: 0.56,
+      late: 0.64,
+      final: 0.72,
+    },
+    fallSpeedMultiplier: 1.22,
+    minDropsPerSecond: 1.25,
+    maxDropsPerSecond: 8.8,
+    minFallDuration: 0.95,
+    maxFallDuration: 4.2,
+  },
+};
+
+const activeDifficultyKey = getDifficultyKeyFromQuery(urlParams.get("difficulty"));
+const activeDifficulty = difficultySettings[activeDifficultyKey];
+const activeTerrainKey = getTerrainKeyFromQuery(urlParams.get("terrain"));
+maxProgressScore = activeDifficulty.targetScore;
+gameDurationSeconds = activeDifficulty.durationSeconds;
+finalChallengeSeconds = activeDifficulty.finalChallengeSeconds;
+timeLeft = gameDurationSeconds;
 
 const winningMessages = [
   "Great work! You helped save more clean water today.",
@@ -91,11 +203,25 @@ function createDrop() {
   drop.className = "water-drop";
 
   // Randomly mark some drops as dirty so both drop types appear
-  const isDirtyDrop = Math.random() < getDirtyDropChance();
+  const isBonusCanDrop = Math.random() < activeDifficulty.bonusCanChance;
+  const isDirtyDrop = !isBonusCanDrop && Math.random() < getDirtyDropChance();
+
+  if (isBonusCanDrop) {
+    drop.classList.add("bonus-can-drop");
+  }
+
   if (isDirtyDrop) {
     drop.classList.add("dirty-drop");
   }
-  drop.dataset.pointChange = isDirtyDrop ? "-1" : "1";
+
+  let pointChange = activeDifficulty.cleanDropPoints;
+  if (isDirtyDrop) {
+    pointChange = -activeDifficulty.dirtyDropDamage;
+  } else if (isBonusCanDrop) {
+    pointChange = activeDifficulty.bonusCanPoints;
+  }
+
+  drop.dataset.pointChange = String(pointChange);
 
   // Keep all drops at one consistent medium size.
   drop.style.width = drop.style.height = `${dropSizePx}px`;
@@ -134,9 +260,10 @@ function runDropSpawnerTick() {
 }
 
 function getDropsPerSecondForCurrentTime() {
-  const baseDropsPerSecond = (maxProgressScore / gameDurationSeconds) * 2.75;
+  const baseDropsPerSecond =
+    (maxProgressScore / gameDurationSeconds) * 2.75 * activeDifficulty.spawnRateMultiplier;
   const dropsPerSecond = baseDropsPerSecond * getCurrentPhaseMultiplier();
-  return clamp(dropsPerSecond, 1.1, 7.5);
+  return clamp(dropsPerSecond, activeDifficulty.minDropsPerSecond, activeDifficulty.maxDropsPerSecond);
 }
 
 function getDropFallDurationSeconds() {
@@ -150,26 +277,75 @@ function getDropFallDurationSeconds() {
     phaseBaseDuration = 2.9;
   }
 
-  return clamp(phaseBaseDuration / getScoreRateDifficultyScale(), 1.2, 4.6);
+  const fallDuration = (phaseBaseDuration / getScoreRateDifficultyScale()) / activeDifficulty.fallSpeedMultiplier;
+  return clamp(fallDuration, activeDifficulty.minFallDuration, activeDifficulty.maxFallDuration);
 }
 
 function getCurrentPhaseMultiplier() {
-  if (timeLeft <= finalChallengeSeconds) return 2.35;
-  if (timeLeft <= gameDurationSeconds / 3) return 1.85;
-  if (timeLeft <= (gameDurationSeconds * 2) / 3) return 1.35;
+  const phaseScale = activeDifficulty.phaseMultiplierScale;
+  if (timeLeft <= finalChallengeSeconds) return 2.35 * phaseScale;
+  if (timeLeft <= gameDurationSeconds / 3) return 1.85 * phaseScale;
+  if (timeLeft <= (gameDurationSeconds * 2) / 3) return 1.35 * phaseScale;
   return 1;
 }
 
 function getDirtyDropChance() {
-  if (timeLeft <= finalChallengeSeconds) return 0.62;
-  if (timeLeft <= gameDurationSeconds / 3) return 0.52;
-  if (timeLeft <= (gameDurationSeconds * 2) / 3) return 0.45;
-  return 0.38;
+  if (timeLeft <= finalChallengeSeconds) return activeDifficulty.dirtyDropChance.final;
+  if (timeLeft <= gameDurationSeconds / 3) return activeDifficulty.dirtyDropChance.late;
+  if (timeLeft <= (gameDurationSeconds * 2) / 3) return activeDifficulty.dirtyDropChance.mid;
+  return activeDifficulty.dirtyDropChance.early;
 }
 
 function getScoreRateDifficultyScale() {
   const targetScoreRate = maxProgressScore / gameDurationSeconds;
   return clamp(targetScoreRate * 1.5, 0.8, 1.8);
+}
+
+function getDifficultyKeyFromQuery(rawDifficulty) {
+  const normalizedDifficulty = (rawDifficulty || "medium").toLowerCase();
+  if (Object.prototype.hasOwnProperty.call(difficultySettings, normalizedDifficulty)) {
+    return normalizedDifficulty;
+  }
+  return "medium";
+}
+
+function getTerrainKeyFromQuery(rawTerrain) {
+  const normalizedTerrain = (rawTerrain || "desert").toLowerCase();
+  if (Object.prototype.hasOwnProperty.call(terrainBackgrounds, normalizedTerrain)) {
+    return normalizedTerrain;
+  }
+  return "desert";
+}
+
+function applyTerrainBackground() {
+  if (!gameContainer) return;
+  gameContainer.style.background = terrainBackgrounds[activeTerrainKey] || terrainBackgrounds.desert;
+}
+
+function getSecondWord(secondsValue) {
+  return secondsValue === 1 ? "second" : "seconds";
+}
+
+function applyDifficultyDetailsToUi() {
+  if (difficultyLabelDisplay) {
+    difficultyLabelDisplay.textContent = activeDifficulty.label;
+  }
+
+  if (roundGoalBadge) {
+    roundGoalBadge.textContent = `${maxProgressScore}+`;
+  }
+
+  if (roundGoalText) {
+    roundGoalText.textContent = `Reach ${maxProgressScore} points before ${gameDurationSeconds} ${getSecondWord(gameDurationSeconds)} ends.`;
+  }
+
+  if (dirtyDropRuleText) {
+    dirtyDropRuleText.textContent = `Avoid it to prevent -${activeDifficulty.dirtyDropDamage} score.`;
+  }
+
+  if (bonusCanRuleText) {
+    bonusCanRuleText.textContent = `Very rare bonus catch worth +${activeDifficulty.bonusCanPoints} score.`;
+  }
 }
 
 function clamp(value, min, max) {
@@ -491,12 +667,30 @@ function clearConfetti() {
   confettiLayer = null;
 }
 
+function isPageReloadNavigation() {
+  const navigationEntries = performance.getEntriesByType("navigation");
+  if (navigationEntries.length > 0) {
+    return navigationEntries[0].type === "reload";
+  }
+
+  if (performance.navigation) {
+    return performance.navigation.type === 1;
+  }
+
+  return false;
+}
+
+applyDifficultyDetailsToUi();
+applyTerrainBackground();
 updateScoreDisplay();
 updateTimeDisplay();
 centerBucket();
 clearEndMessage();
 
-const urlParams = new URLSearchParams(window.location.search);
+if (isPageReloadNavigation()) {
+  window.location.replace("index.html");
+}
+
 const shouldAutoStart = ["1", "true", "yes"].includes((urlParams.get("autostart") || "").toLowerCase());
 
 if (shouldAutoStart) {

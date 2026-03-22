@@ -39,11 +39,43 @@
             <li>Stay focused and react quickly to win</li>
           </ul>
         </section>
+
+        <section class="intro-screen__difficulty" aria-label="choose game difficulty" hidden>
+          <h2 class="intro-screen__difficulty-title">Choose Difficulty</h2>
+          <div class="intro-screen__difficulty-list" role="group" aria-label="difficulty options">
+            <button type="button" class="intro-screen__difficulty-btn" data-difficulty="easy">Easy</button>
+            <button type="button" class="intro-screen__difficulty-btn" data-difficulty="medium">Medium</button>
+            <button type="button" class="intro-screen__difficulty-btn" data-difficulty="hard">Hard</button>
+          </div>
+        </section>
+
+        <section class="intro-screen__terrain" aria-label="choose game terrain" hidden>
+          <h2 class="intro-screen__difficulty-title">Choose Terrain</h2>
+          <div class="intro-screen__terrain-list" role="group" aria-label="terrain options">
+            <button type="button" class="intro-screen__terrain-btn" data-terrain="desert">Desert</button>
+            <button type="button" class="intro-screen__terrain-btn" data-terrain="mountains">Mountains</button>
+            <button type="button" class="intro-screen__terrain-btn" data-terrain="frozen">Frozen</button>
+            <button type="button" class="intro-screen__terrain-btn" data-terrain="grasslands">Grasslands</button>
+          </div>
+        </section>
+        
       </div>
 
       <div class="intro-screen__actions">
         <button id="start-game-btn" type="button" class="intro-screen__start-btn">Start Game</button>
       </div>
+
+      <footer class="cw-link-section cw-link-section--intro" aria-label="charity: water links">
+        <div class="cw-link-brand">
+          <img class="cw-footer-icon" src="img/cw_logo-horizontal.png" alt="charity: water logo">
+          <span class="cw-link-label">Support charity: water</span>
+        </div>
+        <div class="cw-link-actions">
+          <a class="cw-link-btn" href="https://www.charitywater.org/" target="_blank" rel="noopener noreferrer">Visit Site</a>
+          <a class="cw-link-btn" href="https://www.charitywater.org/donate" target="_blank" rel="noopener noreferrer">Donate</a>
+        </div>
+      </footer>
+      
     </div>
 
   </section>
@@ -52,6 +84,14 @@
     const introPanel = document.querySelector(".intro-screen__panel");
     const startGameButton = document.getElementById("start-game-btn");
     const themeToggleButton = document.getElementById("theme-toggle-btn");
+    const infoGrid = document.querySelector(".intro-screen__info-grid");
+    const missionSection = document.querySelector(".intro-screen__mission");
+    const gameplaySection = document.querySelector(".intro-screen__gameplay");
+    const difficultySection = document.querySelector(".intro-screen__difficulty");
+    const terrainSection = document.querySelector(".intro-screen__terrain");
+    const difficultyButtons = document.querySelectorAll(".intro-screen__difficulty-btn");
+    const terrainButtons = document.querySelectorAll(".intro-screen__terrain-btn");
+    let selectedDifficulty = "medium";
 
     function applyTheme(isDarkMode) {
       if (!introPanel || !themeToggleButton) return;
@@ -74,9 +114,38 @@
 
     if (startGameButton) {
       startGameButton.addEventListener("click", () => {
-        window.location.href = "game.html?autostart=1";
+        if (!infoGrid || !missionSection || !gameplaySection || !difficultySection || !terrainSection) {
+          window.location.href = "game.html?autostart=1";
+          return;
+        }
+
+        infoGrid.classList.add("is-choosing-difficulty");
+        missionSection.hidden = true;
+        gameplaySection.hidden = true;
+        difficultySection.hidden = false;
+        terrainSection.hidden = true;
+        startGameButton.hidden = true;
       });
     }
+
+    difficultyButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        selectedDifficulty = button.dataset.difficulty || "medium";
+        if (difficultySection) {
+          difficultySection.hidden = true;
+        }
+        if (terrainSection) {
+          terrainSection.hidden = false;
+        }
+      });
+    });
+
+    terrainButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        const terrain = button.dataset.terrain || "desert";
+        window.location.href = `game.html?autostart=1&difficulty=${encodeURIComponent(selectedDifficulty)}&terrain=${encodeURIComponent(terrain)}`;
+      });
+    });
   </script>
 
 

@@ -27,6 +27,7 @@
     <div class="score-panel">
       <div class="score">Score: <span id="score">0</span></div>
       <div class="timer">Time: <span id="time">30</span>s</div>
+      <div class="difficulty-indicator">Mode: <span id="difficulty-label">Medium</span></div>
       <div class="action-buttons">
         <button id="start-btn">Start Game</button>
         <button id="reset-btn">Reset</button>
@@ -63,20 +64,30 @@
 
                 <div class="col-12 col-md-6">
                   <div class="d-flex align-items-center gap-2 rounded-3 border p-2 intro-legend-item">
-                    <span class="legend-drop legend-drop-bad" aria-hidden="true"></span>
+                    <span class="legend-can" aria-hidden="true"></span>
                     <div class="d-grid intro-copy">
-                      <strong>Bad Drop</strong>
-                      <span>Avoid it to prevent -1 score.</span>
+                      <strong>charity: water Can</strong>
+                      <span id="bonus-can-rule-text">Very rare bonus catch worth +5 score.</span>
                     </div>
                   </div>
                 </div>
 
                 <div class="col-12 col-md-6">
                   <div class="d-flex align-items-center gap-2 rounded-3 border p-2 intro-legend-item">
-                    <span class="badge rounded-pill intro-badge-goal" aria-hidden="true">20+</span>
+                    <span class="legend-drop legend-drop-bad" aria-hidden="true"></span>
+                    <div class="d-grid intro-copy">
+                      <strong>Bad Drop</strong>
+                      <span id="dirty-drop-rule-text">Avoid it to prevent -1 score.</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="col-12 col-md-6">
+                  <div class="d-flex align-items-center gap-2 rounded-3 border p-2 intro-legend-item">
+                    <span id="round-goal-badge" class="badge rounded-pill intro-badge-goal" aria-hidden="true">20+</span>
                     <div class="d-grid intro-copy">
                       <strong>Goal</strong>
-                      <span>Reach 20 points before 30 seconds ends.</span>
+                      <span id="round-goal-text">Reach 20 points before 30 seconds ends.</span>
                     </div>
                   </div>
                 </div>
@@ -109,6 +120,17 @@
     <p class="control-hint">Move bucket: drag/touch in the game area, or use A/D and arrow keys.</p>
 
     <p id="game-message" class="game-message" aria-live="polite"></p>
+
+    <footer class="cw-link-section" aria-label="charity: water links">
+      <div class="cw-link-brand">
+        <img class="cw-footer-icon" src="img/cw_logo-horizontal.png" alt="charity: water logo">
+        <span class="cw-link-label">Support charity: water</span>
+      </div>
+      <div class="cw-link-actions">
+        <a class="cw-link-btn" href="https://www.charitywater.org/" target="_blank" rel="noopener noreferrer">Visit Site</a>
+        <a class="cw-link-btn" href="https://www.charitywater.org/donate" target="_blank" rel="noopener noreferrer">Donate</a>
+      </div>
+    </footer>
 
   </div>
 
