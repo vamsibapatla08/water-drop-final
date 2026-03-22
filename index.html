@@ -50,7 +50,9 @@
       </div>
 
       <section id="intro-setup" class="intro-setup" aria-live="polite" hidden>
+
         <h2 id="setup-title" class="intro-setup__title">Choose Difficulty</h2>
+
         <p id="setup-subtitle" class="intro-setup__subtitle">Select one mode to set the challenge level.</p>
 
         <div id="difficulty-options" class="intro-setup__options" role="group" aria-label="Difficulty modes">
@@ -67,7 +69,9 @@
         </div>
 
         <p id="setup-selection" class="intro-setup__selection" hidden></p>
+
         <button id="setup-back" type="button" class="intro-screen__btn intro-screen__btn--secondary" hidden>Back</button>
+
       </section>
 
       <div class="intro-screen__actions" aria-label="Gameplay options">
@@ -158,6 +162,7 @@
     if (terrainOptions) {
       terrainOptions.addEventListener("click", (event) => {
         const target = event.target;
+        
         if (!(target instanceof HTMLElement)) return;
 
         const terrain = target.getAttribute("data-terrain");
