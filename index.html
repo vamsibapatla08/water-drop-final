@@ -11,49 +11,172 @@
 
 <body>
   <section id="intro-screen" class="intro-screen" aria-labelledby="intro-heading" aria-hidden="false">
+    
     <div class="intro-screen__backdrop" aria-hidden="true"></div>
 
     <div class="intro-screen__panel">
+      
+      <div class="intro-screen__brand" aria-label="charity: water">
+        <img src="img/cw_logo-horizontal.png" alt="charity: water" class="intro-screen__logo">
+        <p class="intro-screen__eyebrow">Play for impact</p>
+      </div>
 
-      <p class="intro-screen__eyebrow">charity: water mission intro</p>
-      <h1 id="intro-heading" class="intro-screen__title">Every Drop Can Change a Life</h1>
-      <p class="intro-screen__text">
-        charity: water helps bring clean, safe water to communities around the world.
-        In this game, clean drops represent progress and dirty drops represent risks to health.
-        Catch wisely and build impact before time runs out.
-      </p>
+      <h1 id="intro-heading" class="intro-screen__title">Water Drop</h1>
+
+      <div class="intro-screen__info-grid">
+
+        <article class="intro-screen__card intro-screen__card--mission" aria-label="charity water mission">
+          <h2 class="intro-screen__card-title">charity: water mission</h2>
+          <p class="intro-screen__text intro-screen__text--mission">
+            charity: water funds local partners to bring clean and safe water to communities around the world.
+            Every project is built for long-term impact in real communities.
+          </p>
+        </article>
+
+        <article class="intro-screen__card intro-screen__card--game" aria-label="game objective">
+          <h2 class="intro-screen__card-title">game objective</h2>
+          <p class="intro-screen__text intro-screen__text--game">
+            Catch clean drops to build impact, avoid dirty drops, and reach the target before time runs out.
+            Fast reactions and steady control will help you win.
+          </p>
+        </article>
+        
+      </div>
+
+      <div class="intro-screen__meta" aria-label="game highlights">
+        <p class="intro-screen__meta-chip"><strong>Goal:</strong> 20 points</p>
+        <p class="intro-screen__meta-chip"><strong>Time:</strong> 30 seconds</p>
+        <p class="intro-screen__meta-chip"><strong>Controls:</strong> Drag or A/D</p>
+      </div>
+
+      <section id="intro-setup" class="intro-setup" aria-live="polite" hidden>
+        <h2 id="setup-title" class="intro-setup__title">Choose Difficulty</h2>
+        <p id="setup-subtitle" class="intro-setup__subtitle">Select one mode to set the challenge level.</p>
+
+        <div id="difficulty-options" class="intro-setup__options" role="group" aria-label="Difficulty modes">
+          <button type="button" class="intro-setup__option" data-difficulty="easy">Easy</button>
+          <button type="button" class="intro-setup__option" data-difficulty="medium">Medium</button>
+          <button type="button" class="intro-setup__option" data-difficulty="hard">Hard</button>
+        </div>
+
+        <div id="terrain-options" class="intro-setup__options" role="group" aria-label="Terrain options" hidden>
+          <button type="button" class="intro-setup__option" data-terrain="forest">Forest</button>
+          <button type="button" class="intro-setup__option" data-terrain="steep-slopes">Steep Slopes</button>
+          <button type="button" class="intro-setup__option" data-terrain="desert">Desert</button>
+          <button type="button" class="intro-setup__option" data-terrain="frozen-regions">Frozen Regions</button>
+        </div>
+
+        <p id="setup-selection" class="intro-setup__selection" hidden></p>
+        <button id="setup-back" type="button" class="intro-screen__btn intro-screen__btn--secondary" hidden>Back</button>
+      </section>
 
       <div class="intro-screen__actions" aria-label="Gameplay options">
-        <a href="game.html?autostart=1" class="intro-screen__btn intro-screen__btn--primary">Start Mission</a>
-        <a href="game.html" class="intro-screen__btn intro-screen__btn--secondary">Enter Arena</a>
-        <button id="intro-guide-btn" type="button" class="intro-screen__btn intro-screen__btn--ghost"
-          aria-expanded="false" aria-controls="intro-guide">
-          How to Play
-        </button>
+        <button id="start-flow-btn" type="button" class="intro-screen__btn intro-screen__btn--primary">Start Game</button>
       </div>
-
-      <div id="intro-guide" class="intro-screen__guide" hidden>
-        <p><strong>Goal:</strong> Reach 20 points in 30 seconds.</p>
-        <p><strong>Controls:</strong> Drag in the game area, or use A/D and arrow keys.</p>
-        <p><strong>Scoring:</strong> Good drops are +1 and dirty drops are -1.</p>
-      </div>
-      
     </div>
   </section>
 
   <script>
-    const guideButton = document.getElementById("intro-guide-btn");
-    const guidePanel = document.getElementById("intro-guide");
+    const introPanel = document.querySelector(".intro-screen__panel");
+    const startFlowButton = document.getElementById("start-flow-btn");
+    const setupSection = document.getElementById("intro-setup");
+    const setupTitle = document.getElementById("setup-title");
+    const setupSubtitle = document.getElementById("setup-subtitle");
+    const setupSelection = document.getElementById("setup-selection");
+    const setupBackButton = document.getElementById("setup-back");
+    const difficultyOptions = document.getElementById("difficulty-options");
+    const terrainOptions = document.getElementById("terrain-options");
 
-    if (guideButton && guidePanel) {
-      guideButton.addEventListener("click", () => {
-        const isExpanded = guideButton.getAttribute("aria-expanded") === "true";
-        guideButton.setAttribute("aria-expanded", String(!isExpanded));
-        guidePanel.hidden = isExpanded;
+    let selectedDifficulty = "";
+
+    function openSetupFlow() {
+      if (!introPanel || !setupSection) return;
+
+      introPanel.classList.add("is-setup-active");
+      setupSection.hidden = false;
+      showDifficultyStep();
+    }
+
+    function showDifficultyStep() {
+      selectedDifficulty = "";
+      setupTitle.textContent = "Choose Difficulty";
+      setupSubtitle.textContent = "Select one mode to set the challenge level.";
+      setupSelection.hidden = true;
+      setupBackButton.hidden = true;
+      difficultyOptions.hidden = false;
+      terrainOptions.hidden = true;
+
+      terrainOptions.querySelectorAll("[data-terrain]").forEach((button) => {
+        button.classList.remove("is-selected");
+      });
+
+      difficultyOptions.querySelectorAll("[data-difficulty]")[0]?.focus();
+    }
+
+    function showTerrainStep(difficulty) {
+      selectedDifficulty = difficulty;
+      setupTitle.textContent = "Choose Terrain";
+      setupSubtitle.textContent = "Pick where your clean-water mission takes place.";
+      setupSelection.hidden = false;
+      setupSelection.textContent = `Difficulty: ${difficulty.charAt(0).toUpperCase()}${difficulty.slice(1)}`;
+      setupBackButton.hidden = false;
+      difficultyOptions.hidden = true;
+      terrainOptions.hidden = false;
+      terrainOptions.querySelectorAll("[data-terrain]")[0]?.focus();
+    }
+
+    function goToGame(terrain) {
+      const query = new URLSearchParams({
+        autostart: "1",
+        difficulty: selectedDifficulty,
+        terrain,
+      });
+
+      window.location.href = `game.html?${query.toString()}`;
+    }
+
+    if (startFlowButton) {
+      startFlowButton.addEventListener("click", openSetupFlow);
+    }
+
+    if (difficultyOptions) {
+      difficultyOptions.addEventListener("click", (event) => {
+        const target = event.target;
+        if (!(target instanceof HTMLElement)) return;
+
+        const difficulty = target.getAttribute("data-difficulty");
+        if (!difficulty) return;
+
+        difficultyOptions.querySelectorAll("[data-difficulty]").forEach((button) => {
+          button.classList.toggle("is-selected", button === target);
+        });
+
+        showTerrainStep(difficulty);
       });
     }
+
+    if (terrainOptions) {
+      terrainOptions.addEventListener("click", (event) => {
+        const target = event.target;
+        if (!(target instanceof HTMLElement)) return;
+
+        const terrain = target.getAttribute("data-terrain");
+        if (!terrain || !selectedDifficulty) return;
+
+        terrainOptions.querySelectorAll("[data-terrain]").forEach((button) => {
+          button.classList.toggle("is-selected", button === target);
+        });
+
+        goToGame(terrain);
+      });
+    }
+
+    if (setupBackButton) {
+      setupBackButton.addEventListener("click", showDifficultyStep);
+    }
   </script>
-  
+
+
 </body>
 
 </html>

@@ -5,6 +5,7 @@ let gameTimer;
 let collisionChecker;
 let score = 0;
 const maxProgressScore = 20;
+const dropSizePx = 52;
 const spawnTickMs = 250;
 const gameDurationSeconds = 30;
 const finalChallengeSeconds = 6;
@@ -96,16 +97,12 @@ function createDrop() {
   }
   drop.dataset.pointChange = isDirtyDrop ? "-1" : "1";
 
-  // Use smaller drops on mobile screens so gameplay stays readable and fair
-  const isMobileScreen = window.matchMedia("(max-width: 560px)").matches;
-  const initialSize = isMobileScreen ? 44 : 60;
-  const sizeMultiplier = isMobileScreen ? Math.random() * 0.65 + 0.5 : Math.random() * 0.8 + 0.5;
-  const size = initialSize * sizeMultiplier;
-  drop.style.width = drop.style.height = `${size}px`;
+  // Keep all drops at one consistent medium size.
+  drop.style.width = drop.style.height = `${dropSizePx}px`;
 
   // Position the drop randomly across the game width
   const gameWidth = gameContainer.offsetWidth;
-  const xPosition = Math.random() * Math.max(gameWidth - size, 0);
+  const xPosition = Math.random() * Math.max(gameWidth - dropSizePx, 0);
   drop.style.left = xPosition + "px";
 
   // Fall speed increases over time and scales with target score rate
