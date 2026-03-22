@@ -119,7 +119,22 @@
 
     <p class="control-hint">Move bucket: drag/touch in the game area, or use A/D and arrow keys.</p>
 
-    <p id="game-message" class="game-message" aria-live="polite"></p>
+    <div id="end-game-modal" class="end-game-modal hidden" aria-hidden="true">
+      <div class="end-game-modal-overlay"></div>
+      <div class="end-game-modal-content">
+        <div class="end-game-modal-header">
+          <h2 id="end-game-title" class="end-game-modal-title">Game Over</h2>
+        </div>
+        <div class="end-game-modal-body">
+          <p id="end-game-message" class="end-game-message">Game completed</p>
+          <p id="final-score-display" class="final-score-display">Final Score: 0</p>
+        </div>
+        <div class="end-game-modal-footer">
+          <button id="play-again-btn" class="end-game-btn btn-primary">Play Again</button>
+          <a href="index.html" id="return-home-btn" class="end-game-btn btn-secondary">Return to Home</a>
+        </div>
+      </div>
+    </div>
 
     <footer class="cw-link-section" aria-label="charity: water links">
       <div class="cw-link-brand">

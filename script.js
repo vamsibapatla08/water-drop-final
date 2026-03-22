@@ -17,7 +17,6 @@ const timeDisplay = document.getElementById("time");
 const gameContainer = document.getElementById("game-container");
 const scoreProgressFill = document.getElementById("score-progress-fill");
 const bucket = document.getElementById("bucket");
-const gameMessage = document.getElementById("game-message");
 const startOverlay = document.getElementById("start-overlay");
 const startButton = document.getElementById("start-btn");
 const dirtyDropNotice = document.getElementById("dirty-drop-notice");
@@ -27,6 +26,11 @@ const roundGoalBadge = document.getElementById("round-goal-badge");
 const roundGoalText = document.getElementById("round-goal-text");
 const dirtyDropRuleText = document.getElementById("dirty-drop-rule-text");
 const bonusCanRuleText = document.getElementById("bonus-can-rule-text");
+const endGameModal = document.getElementById("end-game-modal");
+const endGameTitle = document.getElementById("end-game-title");
+const endGameMessage = document.getElementById("end-game-message");
+const finalScoreDisplay = document.getElementById("final-score-display");
+const playAgainBtn = document.getElementById("play-again-btn");
 const urlParams = new URLSearchParams(window.location.search);
 
 // Audio system - using Web Audio API with data URIs for sound effects
@@ -87,20 +91,44 @@ function playWinSound() {
 
 const terrainBackgrounds = {
   desert: `
-    radial-gradient(circle at 20% 18%, rgba(255, 236, 178, 0.28) 0 16%, rgba(255, 236, 178, 0) 40%),
-    radial-gradient(circle at 82% 26%, rgba(237, 170, 94, 0.25) 0 18%, rgba(237, 170, 94, 0) 45%),
-    linear-gradient(180deg, #ffe5ab 0%, #e8b366 45%, #c78849 100%)
+    /* Sun halo effect */
+    radial-gradient(circle at 85% 15%, rgba(255, 180, 0, 0.35) 0 8%, rgba(255, 200, 50, 0.15) 8% 18%, transparent 25%),
+    /* Sun core */
+    radial-gradient(circle at 85% 15%, #ffd700 0 3%, transparent 8%),
+    /* Hot sky gradient */
+    radial-gradient(ellipse 140% 100% at 50% 0%, rgba(255, 200, 100, 0.4) 0%, rgba(255, 160, 60, 0.2) 25%, transparent 50%),
+    /* Light clouds effect */
+    radial-gradient(circle at 20% 18%, rgba(255, 236, 178, 0.3) 0 16%, rgba(255, 236, 178, 0) 40%),
+    radial-gradient(circle at 82% 26%, rgba(237, 170, 94, 0.28) 0 18%, rgba(237, 170, 94, 0) 45%),
+    /* Sand dunes - back layer */
+    radial-gradient(ellipse 180% 45% at 15% 75%, rgba(200, 140, 80, 0.25) 0%, transparent 60%),
+    radial-gradient(ellipse 200% 50% at 85% 78%, rgba(180, 120, 60, 0.22) 0%, transparent 55%),
+    /* Sand dunes - front layer */
+    radial-gradient(ellipse 220% 60% at 50% 85%, rgba(160, 100, 40, 0.18) 0%, transparent 65%),
+    /* Main sky to sand gradient */
+    linear-gradient(180deg, 
+      #ffe5b4 0%,
+      #ffc966 15%,
+      #ffb84d 30%,
+      #f5a03a 45%,
+      #d9843f 65%,
+      #c78849 85%,
+      #b5724a 100%
+    )
   `,
+
   mountains: `
     radial-gradient(circle at 52% 18%, rgba(236, 242, 248, 0.26) 0 18%, rgba(236, 242, 248, 0) 44%),
     linear-gradient(165deg, rgba(95, 104, 118, 0.9) 0%, rgba(79, 88, 102, 0.9) 35%, rgba(53, 62, 73, 0.92) 100%),
     linear-gradient(180deg, #b9c4d1 0%, #8e9aa8 50%, #657383 100%)
   `,
+
   frozen: `
     radial-gradient(circle at 50% 14%, rgba(255, 255, 255, 0.48) 0 14%, rgba(255, 255, 255, 0) 40%),
     radial-gradient(circle at 14% 78%, rgba(147, 208, 244, 0.26) 0 22%, rgba(147, 208, 244, 0) 52%),
     linear-gradient(180deg, #eef9ff 0%, #ccecff 45%, #95cfee 100%)
   `,
+
   grasslands: `
     radial-gradient(circle at 18% 18%, rgba(255, 255, 255, 0.34) 0 14%, rgba(255, 255, 255, 0) 40%),
     radial-gradient(circle at 84% 26%, rgba(149, 219, 112, 0.26) 0 18%, rgba(149, 219, 112, 0) 46%),
@@ -234,6 +262,14 @@ if (dirtyDropNoticeCloseButton) {
   dirtyDropNoticeCloseButton.addEventListener("click", () => {
     playClickSound();
     hideDirtyDropNotice(true);
+  });
+}
+
+if (playAgainBtn) {
+  playAgainBtn.addEventListener("click", () => {
+    playClickSound();
+    hideEndGameModal();
+    startGame();
   });
 }
 
@@ -613,11 +649,12 @@ function handleWindowResize() {
 function showEndMessage() {
   const wonRound = score >= maxProgressScore;
   const baseMessage = getRandomMessage(wonRound ? winningMessages : losingMessages);
-  const finalMessage = `${baseMessage} Final score: ${score}.`;
 
-  gameMessage.textContent = finalMessage;
-  gameMessage.classList.remove("win", "lose");
-  gameMessage.classList.add(wonRound ? "win" : "lose");
+  endGameTitle.textContent = wonRound ? "You Won!" : "Game Over";
+  endGameMessage.textContent = baseMessage;
+  finalScoreDisplay.textContent = `Final Score: ${score}`;
+
+  showEndGameModal();
 
   if (wonRound) {
     playWinSound();
@@ -628,8 +665,19 @@ function showEndMessage() {
 }
 
 function clearEndMessage() {
-  gameMessage.textContent = "";
-  gameMessage.classList.remove("win", "lose");
+  hideEndGameModal();
+}
+
+function showEndGameModal() {
+  if (!endGameModal) return;
+  endGameModal.classList.remove("hidden");
+  endGameModal.setAttribute("aria-hidden", "false");
+}
+
+function hideEndGameModal() {
+  if (!endGameModal) return;
+  endGameModal.classList.add("hidden");
+  endGameModal.setAttribute("aria-hidden", "true");
 }
 
 function showStartOverlay() {
