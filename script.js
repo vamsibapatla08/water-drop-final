@@ -19,6 +19,7 @@ const scoreProgressFill = document.getElementById("score-progress-fill");
 const bucket = document.getElementById("bucket");
 const startOverlay = document.getElementById("start-overlay");
 const startButton = document.getElementById("start-btn");
+const milestoneMessage = document.getElementById("milestone-message");
 const dirtyDropNotice = document.getElementById("dirty-drop-notice");
 const dirtyDropNoticeCloseButton = document.getElementById("dirty-drop-notice-close");
 const difficultyLabelDisplay = document.getElementById("difficulty-label");
@@ -42,15 +43,15 @@ function playSound(frequency, duration, type = 'sine', volume = 0.3) {
     const now = audioContext.currentTime;
     const osc = audioContext.createOscillator();
     const gain = audioContext.createGain();
-    
+
     osc.type = type;
     osc.frequency.setValueAtTime(frequency, now);
     gain.gain.setValueAtTime(volume, now);
     gain.gain.exponentialRampToValueAtTime(0.01, now + duration);
-    
+
     osc.connect(gain);
     gain.connect(audioContext.destination);
-    
+
     osc.start(now);
     osc.stop(now + duration);
   } catch (e) {
@@ -184,7 +185,7 @@ const difficultySettings = {
     minFallDuration: 1.2,
     maxFallDuration: 4.6,
   },
-  
+
   hard: {
     label: "Hard",
     targetScore: 26,
@@ -222,6 +223,19 @@ const winningMessages = [
   "Great work! You helped save more clean water today.",
   "Amazing catch! Clean water impact unlocked.",
   "You did it! More families can access safe water.",
+  "Incredible effort! You collected enough water cans to help a community.",
+  "Fantastic! Your water can collection makes a real difference.",
+  "Outstanding! You've successfully collected water supplies for those in need.",
+  "Brilliant work! Each water can you caught helps provide clean water access.",
+  "Awesome! Together we're building a water-secure future.",
+];
+
+const milestoneMessages = [
+  "Halfway there! You're collecting water cans like a pro.",
+  "Great momentum! Keep catching those water cans.",
+  "You're doing amazing! Halfway to victory and water collection goal.",
+  "Nice work! 50% of the water cans are in your collection.",
+  "Excellent progress! Your water can gathering is making an impact.",
 ];
 
 const losingMessages = [
@@ -241,6 +255,7 @@ const bucketSmoothing = 0.22;
 let confettiLayer = null;
 let hasShownDirtyDropNotice = false;
 let dirtyDropNoticeTimeoutId = null;
+let hasShownMilestoneMessage = false;
 
 // Wait for button click to start the game
 startButton.addEventListener("click", () => {
@@ -283,11 +298,13 @@ function startGame() {
   score = 0;
   timeLeft = gameDurationSeconds;
   spawnAccumulator = 0;
+  hasShownMilestoneMessage = false;
   updateScoreDisplay();
   updateTimeDisplay();
   clearEndMessage();
   clearConfetti();
   hideDirtyDropNotice(true);
+  hideMilestoneMessage();
   centerBucket();
 
   // Spawn drops in short ticks so drop count can scale with difficulty
@@ -492,11 +509,13 @@ function resetGame() {
   score = 0;
   timeLeft = gameDurationSeconds;
   spawnAccumulator = 0;
+  hasShownMilestoneMessage = false;
   updateScoreDisplay();
   updateTimeDisplay();
   clearEndMessage();
   clearConfetti();
   hideDirtyDropNotice(true);
+  hideMilestoneMessage();
   showStartOverlay();
   centerBucket();
 
@@ -599,11 +618,11 @@ function checkBucketCollisions() {
       dropRect.bottom >= bucketRect.top &&
       dropRect.top <= bucketRect.bottom &&
       dropRect.right >= bucketRect.left &&
-      dropRect.left <= bucketRect.right;
+      dropRect.left <= bucketRect.right; 
 
     if (overlapsBucket) {
       const pointChange = Number(drop.dataset.pointChange || "1");
-      
+
       // Play appropriate sound based on drop type
       if (pointChange < 0) {
         // Dirty drop - negative sound
@@ -616,7 +635,7 @@ function checkBucketCollisions() {
         // Clean drop - positive sound
         playCollectSound();
       }
-      
+
       score = Math.max(0, score + pointChange);
       updateScoreDisplay();
       drop.remove();
@@ -630,6 +649,12 @@ function updateScoreDisplay() {
   const progressRatio = Math.min(score / maxProgressScore, 1);
   const progressPercent = `${progressRatio * 100}%`;
   const isMobileScreen = window.matchMedia("(max-width: 560px)").matches;
+
+  // Check if milestone (50% progress) has been reached
+  if (progressRatio >= 0.5 && !hasShownMilestoneMessage && gameRunning) {
+    hasShownMilestoneMessage = true;
+    showMilestoneMessage();
+  }
 
   if (isMobileScreen) {
     scoreProgressFill.style.width = progressPercent;
@@ -662,6 +687,27 @@ function showEndMessage() {
   } else {
     clearConfetti();
   }
+}
+
+function showMilestoneMessage() {
+  if (!milestoneMessage) return;
+
+  const message = getRandomMessage(milestoneMessages);
+  milestoneMessage.textContent = message;
+  milestoneMessage.setAttribute("aria-hidden", "false");
+  milestoneMessage.classList.add("show");
+
+  // Auto-hide after 4 seconds
+  setTimeout(() => {
+    hideMilestoneMessage();
+  }, 4000);
+}
+
+function hideMilestoneMessage() {
+  if (!milestoneMessage) return;
+
+  milestoneMessage.classList.remove("show");
+  milestoneMessage.setAttribute("aria-hidden", "true");
 }
 
 function clearEndMessage() {
@@ -765,10 +811,12 @@ function launchConfetti() {
     const animation = piece.animate(
       [
         { transform: "translate3d(0, 0, 0) rotate(0deg)", opacity: 1 },
+
         {
           transform: `translate3d(${drift}px, 112vh, 0) rotate(${rotate}deg)`,
           opacity: 0.9,
         },
+
       ],
       {
         duration,
