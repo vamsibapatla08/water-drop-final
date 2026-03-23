@@ -119,21 +119,36 @@ const terrainBackgrounds = {
   `,
 
   mountains: `
-    radial-gradient(circle at 52% 18%, rgba(236, 242, 248, 0.26) 0 18%, rgba(236, 242, 248, 0) 44%),
-    linear-gradient(165deg, rgba(95, 104, 118, 0.9) 0%, rgba(79, 88, 102, 0.9) 35%, rgba(53, 62, 73, 0.92) 100%),
-    linear-gradient(180deg, #b9c4d1 0%, #8e9aa8 50%, #657383 100%)
+    radial-gradient(circle at 78% 16%, rgba(255, 255, 255, 0.34) 0 14%, rgba(255, 255, 255, 0) 36%),
+    linear-gradient(140deg, rgba(242, 248, 255, 0.5) 0 12%, rgba(242, 248, 255, 0) 13%),
+    linear-gradient(38deg, rgba(245, 250, 255, 0.38) 0 10%, rgba(245, 250, 255, 0) 11%),
+    radial-gradient(150% 62% at 22% 108%, rgba(86, 101, 120, 0.94) 0 56%, rgba(86, 101, 120, 0) 57%),
+    radial-gradient(150% 58% at 78% 110%, rgba(65, 78, 95, 0.95) 0 54%, rgba(65, 78, 95, 0) 55%),
+    linear-gradient(180deg, #d5e4f1 0%, #a8bdd2 44%, #7388a0 72%, #5a6d84 100%)
   `,
 
   frozen: `
-    radial-gradient(circle at 50% 14%, rgba(255, 255, 255, 0.48) 0 14%, rgba(255, 255, 255, 0) 40%),
-    radial-gradient(circle at 14% 78%, rgba(147, 208, 244, 0.26) 0 22%, rgba(147, 208, 244, 0) 52%),
-    linear-gradient(180deg, #eef9ff 0%, #ccecff 45%, #95cfee 100%)
+    radial-gradient(circle at 50% 12%, rgba(255, 255, 255, 0.6) 0 16%, rgba(255, 255, 255, 0) 42%),
+    radial-gradient(140% 54% at 16% 108%, rgba(214, 236, 246, 0.94) 0 54%, rgba(214, 236, 246, 0) 55%),
+    radial-gradient(140% 50% at 84% 110%, rgba(186, 221, 239, 0.95) 0 52%, rgba(186, 221, 239, 0) 53%),
+    radial-gradient(72% 24% at 50% 86%, rgba(235, 248, 255, 0.42) 0 42%, rgba(235, 248, 255, 0) 43%),
+    linear-gradient(180deg, #f5fcff 0%, #dceff8 42%, #b9d9ea 70%, #9fc6dc 100%)
+  `,
+
+  tundra: `
+    radial-gradient(circle at 50% 12%, rgba(255, 255, 255, 0.6) 0 16%, rgba(255, 255, 255, 0) 42%),
+    radial-gradient(140% 54% at 16% 108%, rgba(214, 236, 246, 0.94) 0 54%, rgba(214, 236, 246, 0) 55%),
+    radial-gradient(140% 50% at 84% 110%, rgba(186, 221, 239, 0.95) 0 52%, rgba(186, 221, 239, 0) 53%),
+    radial-gradient(72% 24% at 50% 86%, rgba(235, 248, 255, 0.42) 0 42%, rgba(235, 248, 255, 0) 43%),
+    linear-gradient(180deg, #f5fcff 0%, #dceff8 42%, #b9d9ea 70%, #9fc6dc 100%)
   `,
 
   grasslands: `
-    radial-gradient(circle at 18% 18%, rgba(255, 255, 255, 0.34) 0 14%, rgba(255, 255, 255, 0) 40%),
-    radial-gradient(circle at 84% 26%, rgba(149, 219, 112, 0.26) 0 18%, rgba(149, 219, 112, 0) 46%),
-    linear-gradient(180deg, #d8f4b9 0%, #9ed97a 46%, #61a950 100%)
+    radial-gradient(circle at 82% 16%, rgba(255, 255, 255, 0.34) 0 14%, rgba(255, 255, 255, 0) 40%),
+    radial-gradient(150% 66% at 22% 108%, rgba(143, 196, 95, 0.95) 0 58%, rgba(143, 196, 95, 0) 59%),
+    radial-gradient(150% 60% at 78% 108%, rgba(95, 162, 76, 0.96) 0 56%, rgba(95, 162, 76, 0) 57%),
+    radial-gradient(90% 34% at 50% 94%, rgba(176, 220, 121, 0.6) 0 48%, rgba(176, 220, 121, 0) 49%),
+    linear-gradient(180deg, #d8f4bf 0%, #bde89a 40%, #84c969 68%, #5ca14d 100%)
   `,
 };
 
