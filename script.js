@@ -864,10 +864,5 @@ if (isPageReloadNavigation()) {
   window.location.replace("index.html");
 }
 
-const shouldAutoStart = ["1", "true", "yes"].includes((urlParams.get("autostart") || "").toLowerCase());
-
-if (shouldAutoStart) {
-  startGame();
-} else {
-  showStartOverlay();
-}
+// Always show the Round Briefing before gameplay starts, regardless of mode or terrain
+showStartOverlay();

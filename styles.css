@@ -948,7 +948,7 @@ body {
   align-items: stretch;
   gap: 14px;
   width: 100%;
-  max-width: 1800px;
+  max-width: 1200px;
   min-height: calc(100vh - 20px);
   padding: clamp(10px, 1.4vw, 18px);
 }
@@ -1036,7 +1036,7 @@ body {
 
 #game-container {
   width: 100%;
-  height: clamp(360px, 65vh, 600px);
+  height: clamp(380px, 60vh, 550px);
   background:
     radial-gradient(circle at 50% -10%, rgba(255, 255, 255, 0.6) 0 24%, rgba(255, 255, 255, 0) 56%),
     radial-gradient(circle at 14% 18%, rgba(255, 201, 7, 0.12) 0 18%, rgba(255, 201, 7, 0) 52%),
@@ -1087,6 +1087,13 @@ body {
 .intro-legend-item {
   border: 1px solid rgba(46, 157, 247, 0.22);
   background: rgba(46, 157, 247, 0.06);
+  min-height: 100%;
+}
+
+/* Extend last card to full width on medium screens and up */
+.card-body .row .col-md-6:last-child {
+  flex: 0 0 100%;
+  max-width: 100%;
 }
 
 .intro-copy {
@@ -1767,7 +1774,7 @@ body {
   }
 
   #game-container {
-    height: clamp(340px, 62vh, 520px);
+    height: clamp(360px, 58vh, 480px);
   }
 
   .water-drop {
@@ -1947,7 +1954,7 @@ body {
   }
 
   #game-container {
-    height: clamp(340px, 60vh, 480px);
+    height: clamp(320px, 55vh, 420px);
     border-radius: 12px;
   }
 
