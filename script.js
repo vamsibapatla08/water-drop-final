@@ -11,6 +11,7 @@ let gameDurationSeconds = 30;
 let finalChallengeSeconds = 6;
 let timeLeft = gameDurationSeconds;
 let spawnAccumulator = 0;
+let frozenIceBitsCollected = 0; // Tracks frozen ice bits for the pairing mechanic
 
 const scoreDisplay = document.getElementById("score");
 const timeDisplay = document.getElementById("time");
@@ -30,6 +31,12 @@ const endTerrainAckTitle = document.getElementById("end-terrain-ack-title");
 const endTerrainAckText = document.getElementById("end-terrain-ack-text");
 const dirtyDropRuleText = document.getElementById("dirty-drop-rule-text");
 const bonusCanRuleText = document.getElementById("bonus-can-rule-text");
+const terrainDropGuideHeading = document.getElementById("terrain-drop-guide-heading");
+const terrainDropGuideItems = document.querySelectorAll(".terrain-drop-guide-item[data-terrain]");
+const briefingStepOne = document.getElementById("briefing-step-one");
+const briefingStepTwo = document.getElementById("briefing-step-two");
+const briefingNextBtn = document.getElementById("briefing-next-btn");
+const briefingBackBtn = document.getElementById("briefing-back-btn");
 const endGameModal = document.getElementById("end-game-modal");
 const endGameTitle = document.getElementById("end-game-title");
 const endGameMessage = document.getElementById("end-game-message");
@@ -146,12 +153,14 @@ const terrainBackgrounds = {
     linear-gradient(180deg, #f5fcff 0%, #dceff8 42%, #b9d9ea 70%, #9fc6dc 100%)
   `,
 
-  grasslands: `
-    radial-gradient(circle at 82% 16%, rgba(255, 255, 255, 0.34) 0 14%, rgba(255, 255, 255, 0) 40%),
-    radial-gradient(150% 66% at 22% 108%, rgba(143, 196, 95, 0.95) 0 58%, rgba(143, 196, 95, 0) 59%),
-    radial-gradient(150% 60% at 78% 108%, rgba(95, 162, 76, 0.96) 0 56%, rgba(95, 162, 76, 0) 57%),
-    radial-gradient(90% 34% at 50% 94%, rgba(176, 220, 121, 0.6) 0 48%, rgba(176, 220, 121, 0) 49%),
-    linear-gradient(180deg, #d8f4bf 0%, #bde89a 40%, #84c969 68%, #5ca14d 100%)
+  rainforest: `
+    radial-gradient(circle at 82% 16%, rgba(255, 255, 255, 0.25) 0 12%, rgba(255, 255, 255, 0) 35%),
+    radial-gradient(circle at 15% 22%, rgba(76, 175, 80, 0.28) 0 20%, rgba(76, 175, 80, 0) 55%),
+    radial-gradient(circle at 85% 28%, rgba(56, 142, 60, 0.25) 0 18%, rgba(56, 142, 60, 0) 50%),
+    radial-gradient(150% 70% at 20% 110%, rgba(27, 94, 32, 0.92) 0 60%, rgba(27, 94, 32, 0) 62%),
+    radial-gradient(150% 65% at 80% 115%, rgba(13, 56, 23, 0.95) 0 58%, rgba(13, 56, 23, 0) 60%),
+    radial-gradient(ellipse 200% 50% at 50% 85%, rgba(51, 102, 51, 0.35) 0 40%, transparent 65%),
+    linear-gradient(180deg, #4a7c59 0%, #2d5a3d 30%, #1b3a24 60%, #0d1f14 100%)
   `,
 };
 
@@ -188,6 +197,35 @@ const terrainDropSettings = {
     badDropVariants: [
       { className: "dirty-drop", weight: 0.55 },
       { className: "plastic-trash-drop", weight: 0.45 },
+    ],
+  },
+
+  frozen: {
+    // Frozen terrain: ice bits must be paired (2 collected = 1 point). Diesel contamination is the main hazard.
+    // More generous availability and slower drops to accommodate pairing mechanic
+    cleanAvailabilityMultiplier: 1.35,
+    badDropChanceOverride: 0.42,
+    spawnRateMultiplierRange: [0.92, 1.15],
+    fallDurationJitterRange: [0.9, 1.2],
+    isFrozenTerrain: true,
+    frozenIceBitRequired: true,
+    frozenIceBitGoodDropChance: 0.8,
+    badDropVariants: [
+      { className: "diesel-drop", weight: 1 },
+    ],
+  },
+
+  rainforest: {
+    // Rainforest: water is abundant, but contamination can be hard to spot.
+    cleanAvailabilityMultiplier: 1,
+    badDropChanceOverride: 0.5,
+    spawnRateMultiplierRange: [1.05, 1.28],
+    fallDurationJitterRange: [0.82, 1.12],
+    fastGoodDropChance: 0.38,
+    fastGoodDropFallMultiplier: 0.62,
+    badDropVariants: [
+      { className: "rainforest-waste-drop", weight: 0.58 },
+      { className: "rainforest-carcass-drop", weight: 0.42 },
     ],
   },
 };
@@ -266,9 +304,63 @@ const difficultySettings = {
   },
 };
 
+const terrainDifficultyProfiles = {
+  default: {
+    targetScoreMultiplier: 1,
+    durationMultiplier: 1,
+    finalChallengeOffset: 0,
+  },
+  desert: {
+    // Scarcity makes scoring slower, so slightly lower target and a little more time.
+    targetScoreMultiplier: 0.9,
+    durationMultiplier: 1.08,
+    finalChallengeOffset: 1,
+  },
+  mountains: {
+    targetScoreMultiplier: 1,
+    durationMultiplier: 1,
+    finalChallengeOffset: 0,
+  },
+  frozen: {
+    // Pair mechanic needs extra breathing room.
+    targetScoreMultiplier: 0.82,
+    durationMultiplier: 1.28,
+    finalChallengeOffset: 1,
+  },
+  rainforest: {
+    // Fast clean drops and look-alike hazards are balanced near baseline.
+    targetScoreMultiplier: 1,
+    durationMultiplier: 1.04,
+    finalChallengeOffset: 0,
+  },
+};
+
+function getTerrainBalancedDifficulty(baseDifficulty, terrainKey) {
+  const profile = terrainDifficultyProfiles[terrainKey] || terrainDifficultyProfiles.default;
+  const targetScore = Math.max(8, Math.round(baseDifficulty.targetScore * profile.targetScoreMultiplier));
+  const durationSeconds = Math.max(20, Math.round(baseDifficulty.durationSeconds * profile.durationMultiplier));
+  const maxFinalChallengeSeconds = Math.max(4, durationSeconds - 4);
+  const finalChallengeSeconds = clamp(
+    baseDifficulty.finalChallengeSeconds + profile.finalChallengeOffset,
+    4,
+    maxFinalChallengeSeconds
+  );
+
+  return {
+    ...baseDifficulty,
+    dirtyDropChance: { ...baseDifficulty.dirtyDropChance },
+    targetScore,
+    durationSeconds,
+    finalChallengeSeconds,
+  };
+}
+
 const activeDifficultyKey = getDifficultyKeyFromQuery(urlParams.get("difficulty"));
-const activeDifficulty = difficultySettings[activeDifficultyKey];
 const activeTerrainKey = getTerrainKeyFromQuery(urlParams.get("terrain"));
+const activeDifficulty = getTerrainBalancedDifficulty(
+  difficultySettings[activeDifficultyKey],
+  activeTerrainKey
+);
 const activeTerrainDropSettings =
   terrainDropSettings[activeTerrainKey] || terrainDropSettings.default;
 maxProgressScore = activeDifficulty.targetScore;
@@ -313,12 +405,28 @@ let confettiLayer = null;
 let hasShownDirtyDropNotice = false;
 let dirtyDropNoticeTimeoutId = null;
 let hasShownMilestoneMessage = false;
+let briefingStage = 1;
 
 // Wait for button click to start the game
 startButton.addEventListener("click", () => {
   playClickSound();
   startGame();
 });
+
+if (briefingNextBtn) {
+  briefingNextBtn.addEventListener("click", () => {
+    playClickSound();
+    setBriefingStage(2);
+  });
+}
+
+if (briefingBackBtn) {
+  briefingBackBtn.addEventListener("click", () => {
+    playClickSound();
+    setBriefingStage(1);
+  });
+}
+
 document.getElementById("reset-btn").addEventListener("click", () => {
   playClickSound();
   resetGame();
@@ -355,6 +463,7 @@ function startGame() {
   score = 0;
   timeLeft = gameDurationSeconds;
   spawnAccumulator = 0;
+  frozenIceBitsCollected = 0;
   hasShownMilestoneMessage = false;
   updateScoreDisplay();
   updateTimeDisplay();
@@ -391,11 +500,26 @@ function createDrop() {
     drop.classList.add(badDropClassName);
   }
 
+  // Frozen terrain: most good drops are frozen ice bits, with occasional regular good drops.
   let pointChange = activeDifficulty.cleanDropPoints;
   if (isBadDrop) {
     pointChange = -activeDifficulty.dirtyDropDamage;
   } else if (isBonusCanDrop) {
     pointChange = activeDifficulty.bonusCanPoints;
+  } else if (activeTerrainDropSettings.frozenIceBitRequired) {
+    const frozenIceBitChance = clamp(
+      Number(activeTerrainDropSettings.frozenIceBitGoodDropChance ?? 0.8),
+      0,
+      1
+    );
+    const isFrozenIceBitDrop = Math.random() < frozenIceBitChance;
+
+    if (isFrozenIceBitDrop) {
+      // Ice bits are worth 0 individually and score through pairing.
+      drop.classList.add("frozen-ice-bit");
+      pointChange = 0;
+      drop.dataset.isFrozenIceBit = "true";
+    }
   }
 
   drop.dataset.pointChange = String(pointChange);
@@ -408,8 +532,27 @@ function createDrop() {
   const xPosition = Math.random() * Math.max(gameWidth - dropSizePx, 0);
   drop.style.left = xPosition + "px";
 
-  // Fall speed increases over time and scales with target score rate
-  drop.style.animationDuration = `${getDropFallDurationSeconds()}s`;
+  // Fall speed increases over time and scales with target score rate.
+  // In rainforest mode, some clean drops fall much faster to represent plant uptake.
+  let fallDurationSeconds = getDropFallDurationSeconds();
+  const canBeFastRainforestGoodDrop =
+    activeTerrainKey === "rainforest" &&
+    !isBadDrop &&
+    !isBonusCanDrop &&
+    !activeTerrainDropSettings.frozenIceBitRequired;
+
+  if (
+    canBeFastRainforestGoodDrop &&
+    Math.random() < (activeTerrainDropSettings.fastGoodDropChance || 0)
+  ) {
+    drop.classList.add("rainforest-fast-drop");
+    fallDurationSeconds = Math.max(
+      0.55,
+      fallDurationSeconds * (activeTerrainDropSettings.fastGoodDropFallMultiplier || 0.7)
+    );
+  }
+
+  drop.style.animationDuration = `${fallDurationSeconds}s`;
   drop.style.setProperty("--drop-fall-distance", `${gameContainer.clientHeight + 30}px`);
 
   // Add the new drop to the game screen
@@ -549,20 +692,56 @@ function applyTerrainBackground() {
 function applyEndTerrainAcknowledgement() {
   if (!endTerrainAcknowledgement) return;
 
-  if (activeTerrainKey !== "desert") {
+  if (activeTerrainKey === "desert") {
+    endTerrainAcknowledgement.classList.remove("d-none");
+    endTerrainAcknowledgement.setAttribute("data-terrain", "desert");
+
+    if (endTerrainAckTitle) {
+      endTerrainAckTitle.textContent = "Desert Water Reality";
+    }
+
+    if (endTerrainAckText) {
+      endTerrainAckText.textContent =
+        "In many desert communities, water is found only rarely and families may walk miles each day to collect it. charity: water works to fund clean, reliable water projects so people can spend less time walking miles for water resources and more time building their future.";
+    }
+  } else if (activeTerrainKey === "mountains") {
+    endTerrainAcknowledgement.classList.remove("d-none");
+    endTerrainAcknowledgement.setAttribute("data-terrain", "mountains");
+
+    if (endTerrainAckTitle) {
+      endTerrainAckTitle.textContent = "Mountain Water Access Challenge";
+    }
+
+    if (endTerrainAckText) {
+      endTerrainAckText.textContent =
+        "In steep mountain regions, communities face unique challenges: trekking across precipitous slopes for hours to reach water sources, risking dangerous ground conditions, and dealing with limited clean water availability. charity: water is committed to funding sustainable water projects in mountain communities, bringing reliable water access closer to home and enabling people to invest their time in education, work, and building a better future.";
+    }
+  } else if (activeTerrainKey === "frozen") {
+    endTerrainAcknowledgement.classList.remove("d-none");
+    endTerrainAcknowledgement.setAttribute("data-terrain", "frozen");
+
+    if (endTerrainAckTitle) {
+      endTerrainAckTitle.textContent = "Arctic & Tundra Water Challenge";
+    }
+
+    if (endTerrainAckText) {
+      endTerrainAckText.textContent =
+        "In frozen regions and tundra, permafrost melting and diesel contamination from mining and extraction industries threaten water purity. Communities must navigate extreme conditions and environmental hazards to find clean water. charity: water supports sustainable solutions in these fragile ecosystems, ensuring that even in the world's harshest environments, people have access to safe, uncontaminated water for health and dignity.";
+    }
+  } else if (activeTerrainKey === "rainforest") {
+    endTerrainAcknowledgement.classList.remove("d-none");
+    endTerrainAcknowledgement.setAttribute("data-terrain", "rainforest");
+
+    if (endTerrainAckTitle) {
+      endTerrainAckTitle.textContent = "Rainforest Water Reality";
+    }
+
+    if (endTerrainAckText) {
+      endTerrainAckText.textContent =
+        "In rainforest communities, water may be abundant but not always safe. Heavy runoff, animal waste, and decaying insect matter can contaminate sources quickly, creating hidden health risks. charity: water helps fund safe, reliable water systems and local infrastructure so families can access clean water without depending on unsafe surface sources.";
+    }
+  } else {
     endTerrainAcknowledgement.classList.add("d-none");
-    return;
-  }
-
-  endTerrainAcknowledgement.classList.remove("d-none");
-
-  if (endTerrainAckTitle) {
-    endTerrainAckTitle.textContent = "Desert Water Reality";
-  }
-
-  if (endTerrainAckText) {
-    endTerrainAckText.textContent =
-      "In many desert communities, water is found only rarely and families may walk miles each day to collect it. charity: water works to fund clean, reliable water projects so people can spend less time walking for water and more time building their future.";
   }
 }
 
@@ -584,11 +763,47 @@ function applyDifficultyDetailsToUi() {
   }
 
   if (dirtyDropRuleText) {
-    dirtyDropRuleText.textContent = `Avoid it to prevent -${activeDifficulty.dirtyDropDamage} score.`;
+    if (activeTerrainKey === "frozen") {
+      dirtyDropRuleText.textContent = `Avoid diesel drops to prevent -${activeDifficulty.dirtyDropDamage} score.`;
+    } else if (activeTerrainKey === "rainforest") {
+      dirtyDropRuleText.textContent = `Avoid unsafe drops that can look clean (animal waste and insect carcass contamination) to prevent -${activeDifficulty.dirtyDropDamage} score.`;
+    } else {
+      dirtyDropRuleText.textContent = `Avoid it to prevent -${activeDifficulty.dirtyDropDamage} score.`;
+    }
   }
 
   if (bonusCanRuleText) {
-    bonusCanRuleText.textContent = `Very rare bonus catch worth +${activeDifficulty.bonusCanPoints} score.`;
+    if (activeTerrainKey === "frozen") {
+      bonusCanRuleText.textContent = `Mostly frozen ice bits (collect 2 to score), plus occasional regular good drops worth +${activeDifficulty.cleanDropPoints}.`;
+    } else if (activeTerrainKey === "rainforest") {
+      bonusCanRuleText.textContent = `Some clean drops fall extra fast as plants absorb rainfall quickly.`;
+    } else {
+      bonusCanRuleText.textContent = `Very rare bonus catch worth +${activeDifficulty.bonusCanPoints} score.`;
+    }
+  }
+
+  applyTerrainDropGuideDetails();
+}
+
+function applyTerrainDropGuideDetails() {
+  if (terrainDropGuideItems && terrainDropGuideItems.length > 0) {
+    terrainDropGuideItems.forEach((guideItem) => {
+      const itemTerrain = guideItem.getAttribute("data-terrain");
+      const shouldShow = itemTerrain === activeTerrainKey;
+      guideItem.classList.toggle("d-none", !shouldShow);
+      guideItem.setAttribute("aria-hidden", shouldShow ? "false" : "true");
+    });
+  }
+
+  if (terrainDropGuideHeading) {
+    const terrainLabelMap = {
+      desert: "Desert",
+      mountains: "Mountains",
+      frozen: "Frozen Tundra",
+      rainforest: "Rainforest",
+    };
+    const terrainLabel = terrainLabelMap[activeTerrainKey] || "Selected Terrain";
+    terrainDropGuideHeading.textContent = `${terrainLabel} Drop Guide (Read Before Start)`;
   }
 }
 
@@ -656,6 +871,7 @@ function resetGame() {
   score = 0;
   timeLeft = gameDurationSeconds;
   spawnAccumulator = 0;
+  frozenIceBitsCollected = 0;
   hasShownMilestoneMessage = false;
   updateScoreDisplay();
   updateTimeDisplay();
@@ -768,19 +984,35 @@ function checkBucketCollisions() {
       dropRect.left <= bucketRect.right; 
 
     if (overlapsBucket) {
-      const pointChange = Number(drop.dataset.pointChange || "1");
+      const isFrozenIceBit = drop.dataset.isFrozenIceBit === "true";
+      let pointChange = Number(drop.dataset.pointChange || "1");
 
-      // Play appropriate sound based on drop type
-      if (pointChange < 0) {
-        // Dirty drop - negative sound
-        playMissSound();
-        showDirtyDropNoticeOnce();
-      } else if (pointChange > activeDifficulty.cleanDropPoints) {
-        // Bonus can - celebration sound
-        playBonusSound();
+      // Handle frozen ice bit pairing mechanic
+      if (isFrozenIceBit) {
+        frozenIceBitsCollected++;
+        playCollectSound(); // Play sound for each bit collected
+        
+        // 2 frozen ice bits = 1 point
+        if (frozenIceBitsCollected >= 2) {
+          pointChange = 1;
+          frozenIceBitsCollected = 0;
+          playBonusSound(); // Celebration when pair is complete
+        } else {
+          pointChange = 0; // First bit doesn't add points
+        }
       } else {
-        // Clean drop - positive sound
-        playCollectSound();
+        // Play appropriate sound based on drop type
+        if (pointChange < 0) {
+          // Dirty drop - negative sound
+          playMissSound();
+          showDirtyDropNoticeOnce();
+        } else if (pointChange > activeDifficulty.cleanDropPoints) {
+          // Bonus can - celebration sound
+          playBonusSound();
+        } else {
+          // Clean drop - positive sound
+          playCollectSound();
+        }
       }
 
       score = Math.max(0, score + pointChange);
@@ -878,12 +1110,33 @@ function showStartOverlay() {
   if (!startOverlay) return;
   startOverlay.classList.remove("hidden");
   startOverlay.setAttribute("aria-hidden", "false");
+  setBriefingStage(1);
 }
 
 function hideStartOverlay() {
   if (!startOverlay) return;
   startOverlay.classList.add("hidden");
   startOverlay.setAttribute("aria-hidden", "true");
+}
+
+function setBriefingStage(nextStage) {
+  briefingStage = nextStage === 2 ? 2 : 1;
+
+  if (briefingStepOne) {
+    const showStepOne = briefingStage === 1;
+    briefingStepOne.classList.toggle("d-none", !showStepOne);
+    briefingStepOne.setAttribute("aria-hidden", showStepOne ? "false" : "true");
+  }
+
+  if (briefingStepTwo) {
+    const showStepTwo = briefingStage === 2;
+    briefingStepTwo.classList.toggle("d-none", !showStepTwo);
+    briefingStepTwo.setAttribute("aria-hidden", showStepTwo ? "false" : "true");
+  }
+
+  if (startButton && !gameRunning) {
+    startButton.disabled = briefingStage !== 2;
+  }
 }
 
 function showDirtyDropNoticeOnce() {

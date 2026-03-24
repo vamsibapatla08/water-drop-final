@@ -40,64 +40,33 @@ html {
   --cw-paper: #ffffff;
   --cw-mist: #f2f8fd;
   --game-max-width: 100%;
-}
+    body {
+      padding: 8px;
+    }
 
-body {
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  min-height: 100vh;
-  padding: 10px;
-  background:
-    radial-gradient(circle at 10% 16%, rgba(46, 157, 247, 0.28) 0 18%, transparent 19%),
-    radial-gradient(circle at 88% 14%, rgba(255, 201, 7, 0.34) 0 16%, transparent 17%),
-    radial-gradient(circle at 76% 84%, rgba(79, 203, 83, 0.16) 0 20%, transparent 21%),
-    radial-gradient(circle at 16% 78%, rgba(255, 144, 42, 0.16) 0 14%, transparent 15%),
-    linear-gradient(160deg, #e7f5ff 0%, #f2faff 46%, #fff7d1 100%);
-  color: var(--cw-ink);
-}
+    .intro-screen {
+      padding: 6px 6px 84px;
+    }
 
-.intro-screen {
-  position: fixed;
-  inset: 0;
-  z-index: 40;
-  display: grid;
-  place-items: center;
-  padding: 20px;
-  transition: opacity 0.28s ease, visibility 0.28s ease;
-}
+    .intro-screen__panel {
+      border-radius: 14px;
+      border-top-width: 6px;
+      padding: 12px 10px 98px;
+      max-height: calc(100vh - 12px);
+    }
 
-.intro-screen.hidden {
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-}
+    .intro-screen__theme-toggle {
+      top: 8px;
+      right: 8px;
+      min-height: 30px;
+      padding: 4px 8px;
+      font-size: 0.66rem;
+    }
 
-.intro-screen__backdrop {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
-  background: #2e9df7;
-}
-
-.intro-screen__backdrop::before,
-.intro-screen__backdrop::after {
-  content: none;
-}
-
-.intro-screen__backdrop::before {
-  content: none;
-}
-
-.intro-screen__backdrop::after {
-  content: none;
-}
-
-.intro-screen__panel {
-  position: relative;
-  width: min(1020px, 100%);
-  min-height: clamp(590px, 80vh, 730px);
-  border-radius: 28px;
+    .intro-screen__title {
+      font-size: clamp(1.15rem, 7vw, 1.65rem);
+      letter-spacing: 0.05rem;
+    }
   border: 2px solid rgba(26, 103, 161, 0.24);
   border-top: 8px solid var(--cw-yellow);
   background:
@@ -464,12 +433,12 @@ body {
   --bs-btn-border-color: rgba(27, 93, 133, 0.5);
 }
 
-.intro-screen__terrain-btn[data-terrain="grasslands"] {
+.intro-screen__terrain-btn[data-terrain="rainforest"] {
   background:
-    linear-gradient(180deg, rgba(15, 59, 24, 0.38) 0%, rgba(15, 59, 24, 0.38) 100%),
-    linear-gradient(135deg, #6cab4f 0%, #4c8f3b 52%, #2f6729 100%);
+    linear-gradient(180deg, rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0.3) 100%),
+    linear-gradient(135deg, #1b5e20 0%, #0d3817 52%, #081810 100%);
   --bs-btn-color: #ffffff;
-  --bs-btn-border-color: rgba(23, 78, 31, 0.56);
+  --bs-btn-border-color: rgba(10, 30, 15, 0.8);
 }
 
 .intro-screen__difficulty-btn:hover {
@@ -1131,27 +1100,259 @@ body {
   color: #1f6ea9;
 }
 
+.intro-step-actions {
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.briefing-ready-note {
+  color: #1f557c;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.terrain-drop-guide {
+  margin: 0 0 12px;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(46, 157, 247, 0.24);
+  background: linear-gradient(180deg, rgba(242, 248, 253, 0.95) 0%, rgba(232, 242, 250, 0.9) 100%);
+}
+
+.terrain-drop-guide-title {
+  margin: 0 0 8px;
+  font-size: 1.08rem;
+  font-weight: 800;
+  letter-spacing: 0.2px;
+  color: #1f557c;
+}
+
+.terrain-drop-guide-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.terrain-drop-guide-item {
+  display: grid;
+  gap: 2px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(46, 157, 247, 0.2);
+  background: rgba(255, 255, 255, 0.8);
+}
+
+.terrain-drop-guide-item strong {
+  font-size: 0.98rem;
+  font-weight: 800;
+  letter-spacing: 0.18px;
+}
+
+.terrain-drop-guide-item span {
+  font-size: 0.92rem;
+  line-height: 1.45;
+  color: #355b7a;
+}
+
+.terrain-guide-line {
+  display: grid;
+  grid-template-columns: auto auto 1fr;
+  align-items: center;
+  gap: 7px;
+  margin-top: 2px;
+}
+
+.terrain-guide-label {
+  font-size: 0.88rem;
+  font-weight: 800;
+  color: #204b6a;
+  min-width: 40px;
+}
+
+.terrain-guide-icons {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.terrain-guide-copy {
+  font-size: 0.9rem;
+  line-height: 1.42;
+  color: #355b7a;
+}
+
+.terrain-drop-symbol-row {
+  display: flex;
+  gap: 7px;
+  margin: 2px 0 1px;
+}
+
+.terrain-drop-symbol {
+  width: 16px;
+  height: 16px;
+  border-radius: 6px;
+  border: 1.5px solid rgba(26, 67, 104, 0.55);
+  background: #2E9DF7;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.48);
+}
+
+.terrain-drop-symbol--good,
+.terrain-drop-symbol--dirty {
+  border-radius: 50% 50% 60% 60%;
+  clip-path: polygon(50% 0%, 73% 24%, 89% 44%, 92% 61%, 84% 80%, 67% 94%, 50% 100%, 33% 94%, 16% 80%, 8% 61%, 11% 44%, 27% 24%);
+}
+
+.terrain-drop-symbol--good {
+  background: #2E9DF7;
+}
+
+.terrain-drop-symbol--dirty {
+  background: #F5402C;
+  border-color: #6d1c16;
+}
+
+.terrain-drop-symbol--oil {
+  background: linear-gradient(180deg, #5d7184 0%, #31414f 100%);
+  border-color: #1f2b35;
+}
+
+.terrain-drop-symbol--bone {
+  background: linear-gradient(180deg, #f6eac9 0%, #dfc187 100%);
+  border-color: #8f774f;
+}
+
+.terrain-drop-symbol--plastic {
+  background: linear-gradient(180deg, #d8ecf8 0%, #9ac9e2 100%);
+  border-color: #2f688e;
+}
+
+.terrain-drop-symbol--ice {
+  background: linear-gradient(135deg, #e8f4ff 0%, #80deea 55%, #26c6da 100%);
+  border-color: #198aa0;
+}
+
+.terrain-drop-symbol--diesel {
+  background: linear-gradient(180deg, #2a2a2a 0%, #1a1a1a 60%, #0f0f0f 100%);
+  border-color: #070707;
+}
+
+.terrain-drop-symbol--rainforest-fast {
+  background: linear-gradient(180deg, #9fd9ff 0%, #4fb5ff 52%, #2E9DF7 100%);
+  border-color: #1d6fae;
+}
+
+.terrain-drop-symbol--waste {
+  background: linear-gradient(180deg, #86d9ef 0%, #53bea8 52%, #2f8f7a 100%);
+  border-color: #2f766a;
+}
+
+.terrain-drop-symbol--carcass {
+  background: linear-gradient(180deg, #8fdff0 0%, #5cbfba 54%, #3a938a 100%);
+  border-color: #2b756f;
+}
+
+.terrain-drop-guide-item--desert strong {
+  color: #9a5a1f;
+}
+
+.terrain-drop-guide-item--mountains strong {
+  color: #4a5f70;
+}
+
+.terrain-drop-guide-item--frozen strong {
+  color: #0f6f85;
+}
+
+.terrain-drop-guide-item--rainforest strong {
+  color: #225f2d;
+}
+
 .intro-terrain-note {
   display: grid;
-  gap: 4px;
-  padding: 10px 12px;
-  border-radius: 10px;
-  border: 1px solid rgba(255, 144, 42, 0.45);
-  border-left: 5px solid var(--cw-orange);
+  gap: 8px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  border: 2px solid rgba(255, 144, 42, 0.45);
+  border-left: 6px solid var(--cw-orange);
   background: linear-gradient(180deg, rgba(255, 248, 233, 0.98) 0%, rgba(255, 241, 208, 0.95) 100%);
 }
 
 .intro-terrain-note strong {
   color: #8c4b11;
-  font-size: 1.02rem;
+  font-size: 1.15rem;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  font-weight: 700;
 }
 
 .intro-terrain-note span {
   color: #6a4620;
-  font-size: 0.95rem;
-  line-height: 1.45;
+  font-size: 1.02rem;
+  line-height: 1.5;
+}
+
+/* Terrain-specific end-game acknowledgement styling */
+.intro-terrain-note[data-terrain="mountains"] {
+  border-color: rgba(90, 109, 132, 0.5);
+  border-left-color: #5a6d84;
+  background: linear-gradient(180deg, rgba(230, 240, 248, 0.96) 0%, rgba(216, 232, 244, 0.94) 100%);
+}
+
+.intro-terrain-note[data-terrain="mountains"] strong {
+  color: #3a4d5c;
+  font-size: 1.35rem;
+}
+
+.intro-terrain-note[data-terrain="mountains"] span {
+  color: #4a5f70;
+  font-size: 1.1rem;
+  line-height: 1.6;
+}
+
+.intro-terrain-note[data-terrain="frozen"] {
+  border-color: rgba(0, 172, 193, 0.4);
+  border-left-color: #0097a7;
+  background: linear-gradient(180deg, rgba(224, 242, 254, 0.97) 0%, rgba(179, 229, 252, 0.95) 100%);
+}
+
+.intro-terrain-note[data-terrain="frozen"] strong {
+  color: #00695c;
+  font-size: 1.35rem;
+}
+
+.intro-terrain-note[data-terrain="frozen"] span {
+  color: #004d73;
+  font-size: 1.1rem;
+  line-height: 1.6;
+}
+
+.intro-terrain-note[data-terrain="rainforest"] {
+  border-color: rgba(46, 125, 50, 0.45);
+  border-left-color: #2e7d32;
+  background: linear-gradient(180deg, rgba(234, 246, 236, 0.96) 0%, rgba(212, 236, 214, 0.95) 100%);
+}
+
+.intro-terrain-note[data-terrain="rainforest"] strong {
+  color: #1f5d29;
+  font-size: 1.35rem;
+}
+
+.intro-terrain-note[data-terrain="rainforest"] span {
+  color: #2c5c36;
+  font-size: 1.1rem;
+  line-height: 1.6;
+}
+
+.intro-terrain-note[data-terrain="desert"] strong {
+  font-size: 1.35rem;
+}
+
+.intro-terrain-note[data-terrain="desert"] span {
+  font-size: 1.1rem;
+  line-height: 1.6;
 }
 
 .intro-legend-item {
@@ -1406,40 +1607,65 @@ body {
 
 @media (max-width: 640px) {}
 
-.score {
-  flex: 0 1 auto;
-  /* Don't grow, can shrink, auto basis */
-  min-height: 38px;
-  display: flex;
-  align-items: center;
-  font-size: clamp(16px, 1.2vw, 20px);
-  font-weight: bold;
-  background-color: rgba(255, 201, 7, 0.2);
-  border: 1px solid rgba(255, 201, 7, 0.7);
-  border-radius: 10px;
-  padding: 6px 10px;
+body {
+  padding: 8px;
 }
 
-#score {
-  margin-left: 6px;
+.intro-screen {
+  padding: 6px 6px 84px;
 }
 
-.water-drop {
-  position: absolute;
-  width: 48px;
-  height: 48px;
-  background: #2E9DF7;
-  border: 3px solid #000000;
-  border-radius: 50% 50% 60% 60%;
-  clip-path: polygon(50% 0%, 73% 24%, 89% 44%, 92% 61%, 84% 80%, 67% 94%, 50% 100%, 33% 94%, 16% 80%, 8% 61%, 11% 44%, 27% 24%);
-  animation: dropFall linear forwards;
-  transform-origin: center;
-  cursor: default;
-  transition: transform 0.12s ease;
-  box-shadow:
-    inset 0 0 0 1px rgba(255, 255, 255, 0.55),
-    0 0 0 3px rgba(255, 255, 255, 0.7),
-    0 0 10px rgba(10, 79, 130, 0.32);
+.intro-screen__panel {
+  border-radius: 14px;
+  border-top-width: 6px;
+  padding: 12px 10px 98px;
+  max-height: calc(100vh - 12px);
+}
+
+.intro-screen__theme-toggle {
+  top: 8px;
+  right: 8px;
+  min-height: 30px;
+  padding: 4px 8px;
+  font-size: 0.66rem;
+}
+
+.intro-screen__title {
+  font-size: clamp(1.15rem, 7vw, 1.65rem);
+  letter-spacing: 0.05rem;
+}
+
+/* Reduce drop and symbol sizes for mobile */
+.water-drop,
+.frozen-ice-bit {
+  width: 32px !important;
+  height: 32px !important;
+  border-width: 2px !important;
+}
+
+.bonus-can-drop,
+.oil-can-drop,
+.animal-bone-drop,
+.plastic-trash-drop,
+.diesel-drop {
+  width: 34px !important;
+  height: 34px !important;
+  border-width: 1.5px !important;
+  border-radius: 7px !important;
+}
+
+.terrain-drop-symbol {
+  width: 13px !important;
+  height: 13px !important;
+}
+
+.terrain-guide-label,
+.terrain-guide-copy {
+  font-size: 0.8rem !important;
+}
+
+.terrain-drop-guide-item strong {
+  font-size: 0.85rem !important;
 }
 
 .water-drop:hover {
@@ -1509,6 +1735,88 @@ body {
     0 0 0 3px rgba(255, 255, 255, 0.78),
     0 0 0 7px rgba(255, 201, 7, 0.35),
     0 0 14px rgba(132, 94, 4, 0.35);
+}
+
+.frozen-ice-bit {
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, #e8f4ff 0%, #b3e5fc 25%, #80deea 50%, #4dd0e1 75%, #26c6da 100%);
+  border: 3px solid rgba(0, 172, 193, 0.8);
+  border-radius: 8px;
+  clip-path: polygon(20% 0%, 80% 0%, 100% 20%, 100% 80%, 80% 100%, 20% 100%, 0% 80%, 0% 20%);
+  box-shadow:
+    inset 0 0 8px rgba(255, 255, 255, 0.8),
+    0 0 0 3px rgba(0, 150, 170, 0.35),
+    0 0 16px rgba(0, 188, 212, 0.45),
+    0 0 24px rgba(0, 172, 193, 0.25);
+}
+
+.frozen-ice-bit:hover {
+  transform: scale(1.1);
+  box-shadow:
+    inset 0 0 12px rgba(255, 255, 255, 0.9),
+    0 0 0 3px rgba(0, 150, 170, 0.5),
+    0 0 20px rgba(0, 188, 212, 0.6),
+    0 0 28px rgba(0, 172, 193, 0.35);
+}
+
+.rainforest-fast-drop {
+  background: linear-gradient(180deg, #9fd9ff 0%, #4fb5ff 52%, #2E9DF7 100%);
+  border-color: #1d6fae;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.6),
+    0 0 0 3px rgba(255, 255, 255, 0.7),
+    0 0 0 6px rgba(46, 157, 247, 0.34),
+    0 0 14px rgba(19, 88, 145, 0.42);
+}
+
+.rainforest-waste-drop {
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='24' cy='23' r='3.2' fill='%2379552a'/%3E%3Ccircle cx='37' cy='30' r='2.8' fill='%23664424'/%3E%3Ccircle cx='29' cy='39' r='3' fill='%23846534'/%3E%3C/svg%3E") center/82% no-repeat,
+    linear-gradient(180deg, #86d9ef 0%, #53bea8 52%, #2f8f7a 100%);
+  border-color: #2f766a;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.52),
+    0 0 0 3px rgba(255, 255, 255, 0.72),
+    0 0 0 6px rgba(73, 170, 150, 0.3),
+    0 0 12px rgba(69, 53, 35, 0.38);
+}
+
+.rainforest-carcass-drop {
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cellipse cx='24' cy='25' rx='3.4' ry='2.2' fill='%2327382b'/%3E%3Cellipse cx='38' cy='35' rx='3.2' ry='2.1' fill='%231f2c23'/%3E%3Cpath d='M22 23l-3-2M22 27l-3 2M40 33l3-2M40 37l3 2' stroke='%23333d35' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E") center/84% no-repeat,
+    linear-gradient(180deg, #8fdff0 0%, #5cbfba 54%, #3a938a 100%);
+  border-color: #2b756f;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.5),
+    0 0 0 3px rgba(255, 255, 255, 0.72),
+    0 0 0 6px rgba(63, 150, 143, 0.28),
+    0 0 12px rgba(34, 55, 49, 0.42);
+}
+
+.diesel-drop {
+  width: 50px;
+  height: 50px;
+  clip-path: none;
+  border-radius: 10px;
+  border: 2px solid #0a0a0a;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='12' y='10' width='40' height='22' rx='6' fill='%231a1a1a'/%3E%3Crect x='16' y='14' width='32' height='6' rx='3' fill='%23262626'/%3E%3Crect x='20' y='22' width='24' height='28' rx='4' fill='%231f1f1f'/%3E%3Crect x='24' y='26' width='16' height='4' rx='2' fill='%23333333'/%3E%3Crect x='24' y='34' width='16' height='4' rx='2' fill='%23333333'/%3E%3Crect x='24' y='42' width='16' height='4' rx='2' fill='%23333333'/%3E%3Cpath d='M16 32l8 8 12-6-4 10 10 4' stroke='%23d2691e' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E") center/82% no-repeat,
+    linear-gradient(180deg, #2a2a2a 0%, #1a1a1a 60%, #0f0f0f 100%);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.15),
+    0 0 0 3px rgba(255, 255, 255, 0.65),
+    0 0 0 6px rgba(26, 26, 26, 0.5),
+    0 0 14px rgba(0, 0, 0, 0.6);
+}
+
+.diesel-drop:hover {
+  transform: scale(1.05);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.2),
+    0 0 0 3px rgba(255, 255, 255, 0.75),
+    0 0 0 6px rgba(26, 26, 26, 0.6),
+    0 0 16px rgba(0, 0, 0, 0.7);
 }
 
 #bucket {
@@ -1688,6 +1996,7 @@ body {
     opacity: 0;
     transform: scale(0.9) translateY(-30px);
   }
+
   to {
     opacity: 1;
     transform: scale(1) translateY(0);
@@ -1814,6 +2123,19 @@ body {
     padding: 1.35rem !important;
   }
 
+  .terrain-drop-guide-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .intro-step-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .briefing-ready-note {
+    text-align: center;
+  }
+
   .intro-title {
     font-size: 2rem;
   }
@@ -1849,10 +2171,11 @@ body {
 }
 
 @media (max-width: 850px) {
-
-  .game-wrapper,
-  .title-row,
-  .game-area,
+  .intro-screen, .intro-card, .intro-card .card-body {
+    max-height: 92vh;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
   #game-container {
     width: 100%;
   }
