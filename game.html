@@ -43,179 +43,76 @@
           <div class="card border-0 shadow-lg intro-card">
             <div class="card-body p-3 p-md-4">
 
-              <div id="briefing-step-one" class="briefing-step" aria-hidden="false">
-                <h2 class="h3 fw-bold mb-1 intro-title">Round Briefing</h2>
+              <h2 class="h3 fw-bold mb-1 intro-title">Round Briefing</h2>
 
-                <p class="text-secondary mb-3">Please look on the rules, then tap Next to view specific good and bad
-                  drops based on the terrain.</p>
+              <p class="text-secondary mb-3">Learn the drops, beat the target, then hit Start Game.</p>
 
-                <div class="row g-2">
+              <div class="row g-2">
 
-                  <div class="col-12 col-md-6">
-                    <div class="d-flex align-items-center gap-2 rounded-3 border p-2 intro-legend-item">
-                      <span class="legend-drop legend-drop-good" aria-hidden="true"></span>
-                      <div class="d-grid intro-copy">
-                        <strong>Good Drop</strong>
-                        <span>Catch it for +1 score.</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="col-12 col-md-6">
-                    <div class="d-flex align-items-center gap-2 rounded-3 border p-2 intro-legend-item">
-                      <span class="legend-can" aria-hidden="true"></span>
-                      <div class="d-grid intro-copy">
-                        <strong>charity: water Can</strong>
-                        <span id="bonus-can-rule-text">Very rare bonus catch worth +5 score.</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="col-12 col-md-6">
-                    <div class="d-flex align-items-center gap-2 rounded-3 border p-2 intro-legend-item">
-                      <span class="legend-drop legend-drop-bad" aria-hidden="true"></span>
-                      <div class="d-grid intro-copy">
-                        <strong>Bad Drop</strong>
-                        <span id="dirty-drop-rule-text">Avoid it to prevent -1 score.</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="col-12 col-md-6">
-                    <div class="d-flex align-items-center gap-2 rounded-3 border p-2 intro-legend-item">
-                      <span id="round-goal-badge" class="badge rounded-pill intro-badge-goal"
-                        aria-hidden="true">20+</span>
-                      <div class="d-grid intro-copy">
-                        <strong>Goal</strong>
-                        <span id="round-goal-text">Reach 20 points before 30 seconds ends.</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="col-12 col-md-6">
-                    <div class="d-flex align-items-center gap-2 rounded-3 border p-2 intro-legend-item">
-                      <span class="badge rounded-pill intro-badge-controls" aria-hidden="true">A D</span>
-                      <div class="d-grid intro-copy">
-                        <strong>Controls</strong>
-                        <span>Drag in the game area, or use A/D and arrow keys.</span>
-                      </div>
-                    </div>
-                  </div>
-
-                </div>
-
-                <div class="intro-step-actions">
-                  <button id="briefing-next-btn" type="button" class="btn btn-primary">Next: Terrain Drop Guide</button>
-                </div>
-              </div>
-
-              <div id="briefing-step-two" class="briefing-step d-none" aria-hidden="true">
-                <h2 class="h3 fw-bold mb-1 intro-title">Terrain Drop Guide</h2>
-
-                <p class="text-secondary mb-3">Review what each drop means for all terrains, then start the round.</p>
-
-                <div class="terrain-drop-guide" aria-live="polite">
-                  <h3 id="terrain-drop-guide-heading" class="terrain-drop-guide-title">Drop Guide by Terrain (Read
-                    Before Start)</h3>
-                  <div class="terrain-drop-guide-grid">
-                    <div class="terrain-drop-guide-item terrain-drop-guide-item--desert" data-terrain="desert">
-                      <strong>Desert</strong>
-                      <div class="terrain-guide-line">
-                        <span class="terrain-guide-label">Good</span>
-                        <span class="terrain-guide-icons" aria-hidden="true">
-                          <span class="terrain-drop-symbol terrain-drop-symbol--good"></span>
-                        </span>
-                        <span class="terrain-guide-copy">Rare clean drops.</span>
-                      </div>
-                      <div class="terrain-guide-line">
-                        <span class="terrain-guide-label">Bad</span>
-                        <span class="terrain-guide-icons" aria-hidden="true">
-                          <span class="terrain-drop-symbol terrain-drop-symbol--dirty"></span>
-                          <span class="terrain-drop-symbol terrain-drop-symbol--oil"></span>
-                          <span class="terrain-drop-symbol terrain-drop-symbol--bone"></span>
-                        </span>
-                        <span class="terrain-guide-copy">Dirty water, oil cans, and animal bone contamination.</span>
-                      </div>
-                    </div>
-                    <div class="terrain-drop-guide-item terrain-drop-guide-item--mountains" data-terrain="mountains">
-                      <strong>Mountains</strong>
-                      <div class="terrain-guide-line">
-                        <span class="terrain-guide-label">Good</span>
-                        <span class="terrain-guide-icons" aria-hidden="true">
-                          <span class="terrain-drop-symbol terrain-drop-symbol--good"></span>
-                        </span>
-                        <span class="terrain-guide-copy">Clean stream and rain drops.</span>
-                      </div>
-                      <div class="terrain-guide-line">
-                        <span class="terrain-guide-label">Bad</span>
-                        <span class="terrain-guide-icons" aria-hidden="true">
-                          <span class="terrain-drop-symbol terrain-drop-symbol--dirty"></span>
-                          <span class="terrain-drop-symbol terrain-drop-symbol--plastic"></span>
-                        </span>
-                        <span class="terrain-guide-copy">Muddy runoff and plastic trash contamination.</span>
-                      </div>
-                    </div>
-                    <div class="terrain-drop-guide-item terrain-drop-guide-item--frozen" data-terrain="frozen">
-                      <strong>Frozen Tundra</strong>
-                      <div class="terrain-guide-line">
-                        <span class="terrain-guide-label">Good</span>
-                        <span class="terrain-guide-icons" aria-hidden="true">
-                          <span class="terrain-drop-symbol terrain-drop-symbol--good"></span>
-                          <span class="terrain-drop-symbol terrain-drop-symbol--ice"></span>
-                        </span>
-                        <span class="terrain-guide-copy">Mostly frozen ice bits (collect 2 bits to score), with occasional regular good drops that score normally.</span>
-                      </div>
-                      <div class="terrain-guide-line">
-                        <span class="terrain-guide-label">Bad</span>
-                        <span class="terrain-guide-icons" aria-hidden="true">
-                          <span class="terrain-drop-symbol terrain-drop-symbol--diesel"></span>
-                        </span>
-                        <span class="terrain-guide-copy">Diesel contamination.</span>
-                      </div>
-                    </div>
-                    <div class="terrain-drop-guide-item terrain-drop-guide-item--rainforest" data-terrain="rainforest">
-                      <strong>Rainforest</strong>
-                      <div class="terrain-guide-line">
-                        <span class="terrain-guide-label">Good</span>
-                        <span class="terrain-guide-icons" aria-hidden="true">
-                          <span class="terrain-drop-symbol terrain-drop-symbol--rainforest-fast"></span>
-                        </span>
-                        <span class="terrain-guide-copy">Some clean rainfall drops fall fast as plants absorb water quickly, and they are similar in color to regular good drops.</span>
-                      </div>
-                      <div class="terrain-guide-line">
-                        <span class="terrain-guide-label">Bad</span>
-                        <span class="terrain-guide-icons" aria-hidden="true">
-                          <span class="terrain-drop-symbol terrain-drop-symbol--waste"></span>
-                          <span class="terrain-drop-symbol terrain-drop-symbol--carcass"></span>
-                        </span>
-                        <span class="terrain-guide-copy">Unsafe look-alike drops from animal waste and insect
-                          carcasses.</span>
-                      </div>
+                <div class="col-12 col-md-6">
+                  <div class="d-flex align-items-center gap-2 rounded-3 border p-2 intro-legend-item">
+                    <span class="legend-drop legend-drop-good" aria-hidden="true"></span>
+                    <div class="d-grid intro-copy">
+                      <strong>Good Drop</strong>
+                      <span>Catch it for +1 score.</span>
                     </div>
                   </div>
                 </div>
 
-                <div class="intro-step-actions">
-                  <button id="briefing-back-btn" type="button" class="btn btn-outline-secondary">Back</button>
-                  <span class="briefing-ready-note">Now click Start Game above to begin.</span>
+                <div class="col-12 col-md-6">
+                  <div class="d-flex align-items-center gap-2 rounded-3 border p-2 intro-legend-item">
+                    <span class="legend-can" aria-hidden="true"></span>
+                    <div class="d-grid intro-copy">
+                      <strong>charity: water Can</strong>
+                      <span id="bonus-can-rule-text">Very rare bonus catch worth +5 score.</span>
+                    </div>
+                  </div>
                 </div>
+
+                <div class="col-12 col-md-6">
+                  <div class="d-flex align-items-center gap-2 rounded-3 border p-2 intro-legend-item">
+                    <span class="legend-drop legend-drop-bad" aria-hidden="true"></span>
+                    <div class="d-grid intro-copy">
+                      <strong>Bad Drop</strong>
+                      <span id="dirty-drop-rule-text">Avoid it to prevent -1 score.</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="col-12 col-md-6">
+                  <div class="d-flex align-items-center gap-2 rounded-3 border p-2 intro-legend-item">
+                    <span id="round-goal-badge" class="badge rounded-pill intro-badge-goal" aria-hidden="true">20+</span>
+                    <div class="d-grid intro-copy">
+                      <strong>Goal</strong>
+                      <span id="round-goal-text">Reach 20 points before 30 seconds ends.</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="col-12 col-md-6">
+                  <div class="d-flex align-items-center gap-2 rounded-3 border p-2 intro-legend-item">
+                    <span class="badge rounded-pill intro-badge-controls" aria-hidden="true">A D</span>
+                    <div class="d-grid intro-copy">
+                      <strong>Controls</strong>
+                      <span>Drag in the game area, or use A/D and arrow keys.</span>
+                    </div>
+                  </div>
+                </div>
+
               </div>
             </div>
           </div>
         </div>
 
-        <div id="dirty-drop-notice" class="alert alert-danger alert-dismissible fade dirty-drop-notice d-none"
-          role="alert" aria-live="polite">
-          <strong>Bad drop caught.</strong> Hazards like dirty water, plastic trash, oil cans, and bones reduce your
-          score.
+        <div id="dirty-drop-notice" class="alert alert-danger alert-dismissible fade dirty-drop-notice d-none" role="alert" aria-live="polite">
+          <strong>Bad drop caught.</strong> Hazards like dirty water, plastic trash, oil cans, and bones reduce your score.
           <button id="dirty-drop-notice-close" type="button" class="btn-close" aria-label="Close warning"></button>
         </div>
 
-        <div id="milestone-message" class="game-message milestone-message" role="status" aria-live="polite"
-          aria-hidden="true"></div>
+        <div id="milestone-message" class="game-message milestone-message" role="status" aria-live="polite" aria-hidden="true"></div>
 
         <div id="bucket" aria-hidden="true"></div>
-
+        
       </div>
     </div>
 
@@ -227,7 +124,6 @@
         <div class="end-game-modal-header">
           <h2 id="end-game-title" class="end-game-modal-title">Game Over</h2>
         </div>
-
         <div class="end-game-modal-body">
           <p id="end-game-message" class="end-game-message">Game completed</p>
           <p id="final-score-display" class="final-score-display">Final Score: 0</p>
@@ -236,7 +132,6 @@
             <span id="end-terrain-ack-text"></span>
           </div>
         </div>
-
         <div class="end-game-modal-footer">
           <button id="play-again-btn" class="end-game-btn btn-primary">Play Again</button>
           <a href="index.html" id="return-home-btn" class="end-game-btn btn-secondary">Return to Home</a>
@@ -249,12 +144,9 @@
         <img class="cw-footer-icon" src="img/cw_logo-horizontal.png" alt="charity: water logo">
         <span class="cw-link-label">Support charity: water</span>
       </div>
-
       <div class="cw-link-actions">
-        <a class="cw-link-btn" href="https://www.charitywater.org/" target="_blank" rel="noopener noreferrer">Visit
-          Site</a>
-        <a class="cw-link-btn" href="https://www.charitywater.org/donate" target="_blank"
-          rel="noopener noreferrer">Donate</a>
+        <a class="cw-link-btn" href="https://www.charitywater.org/" target="_blank" rel="noopener noreferrer">Visit Site</a>
+        <a class="cw-link-btn" href="https://www.charitywater.org/donate" target="_blank" rel="noopener noreferrer">Donate</a>
       </div>
     </footer>
 
