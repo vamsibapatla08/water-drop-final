@@ -105,7 +105,7 @@
         </div>
 
         <div id="dirty-drop-notice" class="alert alert-danger alert-dismissible fade dirty-drop-notice d-none" role="alert" aria-live="polite">
-          <strong>Bad drop caught.</strong> Dirty water drops can deteriorate the environment and health.
+          <strong>Bad drop caught.</strong> Hazards like dirty water, plastic trash, oil cans, and bones reduce your score.
           <button id="dirty-drop-notice-close" type="button" class="btn-close" aria-label="Close warning"></button>
         </div>
 
@@ -127,6 +127,10 @@
         <div class="end-game-modal-body">
           <p id="end-game-message" class="end-game-message">Game completed</p>
           <p id="final-score-display" class="final-score-display">Final Score: 0</p>
+          <div id="end-terrain-acknowledgement" class="intro-terrain-note d-none" aria-live="polite">
+            <strong id="end-terrain-ack-title">Desert Water Reality</strong>
+            <span id="end-terrain-ack-text"></span>
+          </div>
         </div>
         <div class="end-game-modal-footer">
           <button id="play-again-btn" class="end-game-btn btn-primary">Play Again</button>

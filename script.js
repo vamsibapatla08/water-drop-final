@@ -25,6 +25,9 @@ const dirtyDropNoticeCloseButton = document.getElementById("dirty-drop-notice-cl
 const difficultyLabelDisplay = document.getElementById("difficulty-label");
 const roundGoalBadge = document.getElementById("round-goal-badge");
 const roundGoalText = document.getElementById("round-goal-text");
+const endTerrainAcknowledgement = document.getElementById("end-terrain-acknowledgement");
+const endTerrainAckTitle = document.getElementById("end-terrain-ack-title");
+const endTerrainAckText = document.getElementById("end-terrain-ack-text");
 const dirtyDropRuleText = document.getElementById("dirty-drop-rule-text");
 const bonusCanRuleText = document.getElementById("bonus-can-rule-text");
 const endGameModal = document.getElementById("end-game-modal");
@@ -152,6 +155,43 @@ const terrainBackgrounds = {
   `,
 };
 
+const terrainDropSettings = {
+  default: {
+    cleanAvailabilityMultiplier: 1,
+    badDropChanceOverride: null,
+    spawnRateMultiplierRange: [1, 1],
+    fallDurationJitterRange: [1, 1],
+    badDropVariants: [
+      { className: "dirty-drop", weight: 1 },
+    ],
+  },
+
+  desert: {
+    // Scarcer clean water in the desert means more hazard drops overall.
+    cleanAvailabilityMultiplier: 0.68,
+    badDropChanceOverride: null,
+    spawnRateMultiplierRange: [0.95, 1.08],
+    fallDurationJitterRange: [0.95, 1.06],
+    badDropVariants: [
+      { className: "dirty-drop", weight: 0.55 },
+      { className: "oil-can-drop", weight: 0.25 },
+      { className: "animal-bone-drop", weight: 0.2 },
+    ],
+  },
+
+  mountains: {
+    // Rivers and rain can bring clean water, but runoff and trash create equal hazards.
+    cleanAvailabilityMultiplier: 1,
+    badDropChanceOverride: 0.5,
+    spawnRateMultiplierRange: [0.76, 1.34],
+    fallDurationJitterRange: [0.72, 1.36],
+    badDropVariants: [
+      { className: "dirty-drop", weight: 0.55 },
+      { className: "plastic-trash-drop", weight: 0.45 },
+    ],
+  },
+};
+
 const difficultySettings = {
   easy: {
     label: "Easy",
@@ -229,6 +269,8 @@ const difficultySettings = {
 const activeDifficultyKey = getDifficultyKeyFromQuery(urlParams.get("difficulty"));
 const activeDifficulty = difficultySettings[activeDifficultyKey];
 const activeTerrainKey = getTerrainKeyFromQuery(urlParams.get("terrain"));
+const activeTerrainDropSettings =
+  terrainDropSettings[activeTerrainKey] || terrainDropSettings.default;
 maxProgressScore = activeDifficulty.targetScore;
 gameDurationSeconds = activeDifficulty.durationSeconds;
 finalChallengeSeconds = activeDifficulty.finalChallengeSeconds;
@@ -335,20 +377,22 @@ function createDrop() {
   const drop = document.createElement("div");
   drop.className = "water-drop";
 
-  // Randomly mark some drops as dirty so both drop types appear
+  // In desert mode, clean drops are intentionally scarcer.
   const isBonusCanDrop = Math.random() < activeDifficulty.bonusCanChance;
-  const isDirtyDrop = !isBonusCanDrop && Math.random() < getDirtyDropChance();
+  const adjustedBadDropChance = getAdjustedBadDropChance();
+  const isBadDrop = !isBonusCanDrop && Math.random() < adjustedBadDropChance;
+  const badDropClassName = isBadDrop ? getRandomBadDropClassName() : null;
 
   if (isBonusCanDrop) {
     drop.classList.add("bonus-can-drop");
   }
 
-  if (isDirtyDrop) {
-    drop.classList.add("dirty-drop");
+  if (isBadDrop && badDropClassName) {
+    drop.classList.add(badDropClassName);
   }
 
   let pointChange = activeDifficulty.cleanDropPoints;
-  if (isDirtyDrop) {
+  if (isBadDrop) {
     pointChange = -activeDifficulty.dirtyDropDamage;
   } else if (isBonusCanDrop) {
     pointChange = activeDifficulty.bonusCanPoints;
@@ -377,6 +421,42 @@ function createDrop() {
   });
 }
 
+function getAdjustedBadDropChance() {
+  if (typeof activeTerrainDropSettings.badDropChanceOverride === "number") {
+    return clamp(activeTerrainDropSettings.badDropChanceOverride, 0, 0.96);
+  }
+
+  const baseBadDropChance = getDirtyDropChance();
+  const cleanAvailabilityMultiplier =
+    activeTerrainDropSettings.cleanAvailabilityMultiplier || 1;
+
+  const adjustedBadDropChance = 1 - (1 - baseBadDropChance) * cleanAvailabilityMultiplier;
+  return clamp(adjustedBadDropChance, 0, 0.96);
+}
+
+function getRandomBadDropClassName() {
+  const badDropVariants = activeTerrainDropSettings.badDropVariants;
+  if (!Array.isArray(badDropVariants) || badDropVariants.length === 0) {
+    return "dirty-drop";
+  }
+
+  const totalWeight = badDropVariants.reduce((sum, variant) => sum + variant.weight, 0);
+  if (totalWeight <= 0) {
+    return badDropVariants[0].className;
+  }
+
+  let randomValue = Math.random() * totalWeight;
+
+  for (const variant of badDropVariants) {
+    randomValue -= variant.weight;
+    if (randomValue <= 0) {
+      return variant.className;
+    }
+  }
+
+  return badDropVariants[badDropVariants.length - 1].className;
+}
+
 function runDropSpawnerTick() {
   if (!gameRunning) return;
 
@@ -395,7 +475,12 @@ function runDropSpawnerTick() {
 function getDropsPerSecondForCurrentTime() {
   const baseDropsPerSecond =
     (maxProgressScore / gameDurationSeconds) * 2.75 * activeDifficulty.spawnRateMultiplier;
-  const dropsPerSecond = baseDropsPerSecond * getCurrentPhaseMultiplier();
+  const terrainSpawnRateMultiplier = getTerrainRangeValue(
+    activeTerrainDropSettings.spawnRateMultiplierRange,
+    1
+  );
+  const dropsPerSecond =
+    baseDropsPerSecond * getCurrentPhaseMultiplier() * terrainSpawnRateMultiplier;
   return clamp(dropsPerSecond, activeDifficulty.minDropsPerSecond, activeDifficulty.maxDropsPerSecond);
 }
 
@@ -410,7 +495,13 @@ function getDropFallDurationSeconds() {
     phaseBaseDuration = 2.9;
   }
 
-  const fallDuration = (phaseBaseDuration / getScoreRateDifficultyScale()) / activeDifficulty.fallSpeedMultiplier;
+  const terrainFallDurationMultiplier = getTerrainRangeValue(
+    activeTerrainDropSettings.fallDurationJitterRange,
+    1
+  );
+  const fallDuration =
+    ((phaseBaseDuration / getScoreRateDifficultyScale()) / activeDifficulty.fallSpeedMultiplier) *
+    terrainFallDurationMultiplier;
   return clamp(fallDuration, activeDifficulty.minFallDuration, activeDifficulty.maxFallDuration);
 }
 
@@ -455,6 +546,26 @@ function applyTerrainBackground() {
   gameContainer.style.background = terrainBackgrounds[activeTerrainKey] || terrainBackgrounds.desert;
 }
 
+function applyEndTerrainAcknowledgement() {
+  if (!endTerrainAcknowledgement) return;
+
+  if (activeTerrainKey !== "desert") {
+    endTerrainAcknowledgement.classList.add("d-none");
+    return;
+  }
+
+  endTerrainAcknowledgement.classList.remove("d-none");
+
+  if (endTerrainAckTitle) {
+    endTerrainAckTitle.textContent = "Desert Water Reality";
+  }
+
+  if (endTerrainAckText) {
+    endTerrainAckText.textContent =
+      "In many desert communities, water is found only rarely and families may walk miles each day to collect it. charity: water works to fund clean, reliable water projects so people can spend less time walking for water and more time building their future.";
+  }
+}
+
 function getSecondWord(secondsValue) {
   return secondsValue === 1 ? "second" : "seconds";
 }
@@ -483,6 +594,27 @@ function applyDifficultyDetailsToUi() {
 
 function clamp(value, min, max) {
   return Math.min(max, Math.max(min, value));
+}
+
+function getTerrainRangeValue(range, fallbackValue) {
+  if (!Array.isArray(range) || range.length !== 2) {
+    return fallbackValue;
+  }
+
+  const minValue = Number(range[0]);
+  const maxValue = Number(range[1]);
+
+  if (!Number.isFinite(minValue) || !Number.isFinite(maxValue)) {
+    return fallbackValue;
+  }
+
+  if (minValue === maxValue) {
+    return minValue;
+  }
+
+  const lower = Math.min(minValue, maxValue);
+  const upper = Math.max(minValue, maxValue);
+  return lower + Math.random() * (upper - lower);
 }
 
 function updateTimer() {
@@ -693,6 +825,7 @@ function showEndMessage() {
   endGameTitle.textContent = wonRound ? "You Won!" : "Game Over";
   endGameMessage.textContent = baseMessage;
   finalScoreDisplay.textContent = `Final Score: ${score}`;
+  applyEndTerrainAcknowledgement();
 
   showEndGameModal();
 
