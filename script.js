@@ -130,6 +130,24 @@ const terrainBackgrounds = {
     linear-gradient(180deg, #d5e4f1 0%, #a8bdd2 44%, #7388a0 72%, #5a6d84 100%)
   `,
 
+  rainforest: `
+    radial-gradient(circle at 18% 18%, rgba(218, 248, 220, 0.2) 0 16%, rgba(218, 248, 220, 0) 42%),
+    radial-gradient(circle at 84% 22%, rgba(154, 226, 156, 0.2) 0 14%, rgba(154, 226, 156, 0) 40%),
+    radial-gradient(160% 62% at 20% 110%, rgba(39, 108, 55, 0.9) 0 58%, rgba(39, 108, 55, 0) 59%),
+    radial-gradient(150% 56% at 80% 108%, rgba(28, 88, 46, 0.9) 0 56%, rgba(28, 88, 46, 0) 57%),
+    radial-gradient(100% 32% at 50% 88%, rgba(89, 158, 86, 0.5) 0 48%, rgba(89, 158, 86, 0) 49%),
+    linear-gradient(180deg, #376f48 0%, #2c5f3f 34%, #234f35 62%, #1d422d 100%)
+  `,
+
+  arctic: `
+    radial-gradient(circle at 82% 12%, rgba(255, 255, 255, 0.6) 0 16%, rgba(255, 255, 255, 0) 42%),
+    radial-gradient(circle at 22% 24%, rgba(232, 247, 255, 0.42) 0 14%, rgba(232, 247, 255, 0) 40%),
+    radial-gradient(150% 58% at 16% 108%, rgba(184, 218, 237, 0.95) 0 56%, rgba(184, 218, 237, 0) 57%),
+    radial-gradient(150% 52% at 84% 110%, rgba(154, 196, 223, 0.95) 0 54%, rgba(154, 196, 223, 0) 55%),
+    radial-gradient(80% 28% at 50% 88%, rgba(229, 245, 255, 0.56) 0 44%, rgba(229, 245, 255, 0) 45%),
+    linear-gradient(180deg, #ebf8ff 0%, #c9e5f5 42%, #9dc9e2 72%, #7db1d1 100%)
+  `,
+
   frozen: `
     radial-gradient(circle at 50% 12%, rgba(255, 255, 255, 0.6) 0 16%, rgba(255, 255, 255, 0) 42%),
     radial-gradient(140% 54% at 16% 108%, rgba(214, 236, 246, 0.94) 0 54%, rgba(214, 236, 246, 0) 55%),
@@ -188,6 +206,30 @@ const terrainDropSettings = {
     badDropVariants: [
       { className: "dirty-drop", weight: 0.55 },
       { className: "plastic-trash-drop", weight: 0.45 },
+    ],
+  },
+
+  rainforest: {
+    // Rainfall helps clean water availability, but runoff and debris still matter.
+    cleanAvailabilityMultiplier: 1.16,
+    badDropChanceOverride: null,
+    spawnRateMultiplierRange: [1.02, 1.2],
+    fallDurationJitterRange: [0.9, 1.08],
+    badDropVariants: [
+      { className: "dirty-drop", weight: 0.62 },
+      { className: "plastic-trash-drop", weight: 0.38 },
+    ],
+  },
+
+  arctic: {
+    // In arctic climates, scarce flow and harsh conditions make clean catches less frequent.
+    cleanAvailabilityMultiplier: 0.82,
+    badDropChanceOverride: null,
+    spawnRateMultiplierRange: [0.88, 1.02],
+    fallDurationJitterRange: [1.06, 1.22],
+    badDropVariants: [
+      { className: "dirty-drop", weight: 0.72 },
+      { className: "oil-can-drop", weight: 0.28 },
     ],
   },
 };
@@ -589,6 +631,32 @@ function applyEndTerrainAcknowledgement() {
       endTerrainAckText.textContent =
         "In steep mountain regions, communities face unique challenges: trekking across precipitous slopes for hours to reach water sources, risking dangerous ground conditions, and dealing with limited clean water availability. charity: water is committed to funding sustainable water projects in mountain communities, bringing reliable water access closer to home and enabling people to invest their time in education, work, and building a better future.";
     }
+  } else if (activeTerrainKey === "rainforest") {
+    endTerrainAcknowledgement.classList.remove("d-none");
+    endTerrainAcknowledgement.setAttribute("data-terrain", "rainforest");
+
+    if (endTerrainAckTitle) {
+      endTerrainAckTitle.textContent = "Rainforest Water Quality Reality";
+    }
+
+    if (endTerrainAckText) {
+      endTerrainAckText.textContent =
+        "In rainforest regions, water can be abundant but not always safe. Flooding, sediment, and contamination can leave communities without reliable drinking water. charity: water supports long-term water systems and local maintenance so families can access safe water year-round.";
+    }
+  } else if (activeTerrainKey === "arctic") {
+    endTerrainAcknowledgement.classList.remove("d-none");
+    endTerrainAcknowledgement.setAttribute("data-terrain", "arctic");
+
+    if (endTerrainAckTitle) {
+      endTerrainAckTitle.textContent = "Arctic Water Access Reality";
+    }
+
+    if (endTerrainAckText) {
+      endTerrainAckText.textContent =
+        "In arctic communities, extreme cold and frozen ground make water infrastructure difficult to build and maintain. Families can still face long waits or travel for safe water. charity: water invests in durable, climate-appropriate systems that keep clean water flowing in harsh conditions.";
+    }
+  } else {
+    endTerrainAcknowledgement.classList.add("d-none");
   }
 }
 

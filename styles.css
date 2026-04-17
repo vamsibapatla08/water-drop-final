@@ -456,6 +456,22 @@ body {
   --bs-btn-border-color: rgba(31, 42, 54, 0.58);
 }
 
+.intro-screen__terrain-btn[data-terrain="rainforest"] {
+  background:
+    linear-gradient(180deg, rgba(8, 44, 20, 0.38) 0%, rgba(8, 44, 20, 0.38) 100%),
+    linear-gradient(135deg, #4a9b52 0%, #2f7a37 54%, #1d5b2a 100%);
+  --bs-btn-color: #ffffff;
+  --bs-btn-border-color: rgba(19, 88, 34, 0.56);
+}
+
+.intro-screen__terrain-btn[data-terrain="arctic"] {
+  background:
+    linear-gradient(180deg, rgba(11, 51, 78, 0.36) 0%, rgba(11, 51, 78, 0.36) 100%),
+    linear-gradient(135deg, #8bc6e8 0%, #5aa1cd 52%, #2f77a8 100%);
+  --bs-btn-color: #ffffff;
+  --bs-btn-border-color: rgba(32, 106, 152, 0.54);
+}
+
 .intro-screen__terrain-btn[data-terrain="frozen"] {
   background:
     linear-gradient(180deg, rgba(9, 57, 82, 0.4) 0%, rgba(9, 57, 82, 0.4) 100%),
